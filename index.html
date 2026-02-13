@@ -3,34 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PadelPilot | Coach Hub Pro+</title>
+    <title>PadelPilot | Coach Hub Pro+ Fixed</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap');
-        body { background-color: #F8FAFC; color: #1E293B; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; overflow: hidden; }
-        .app-container { height: 100vh; display: flex; flex-direction: column; position: relative; }
-        .app-content { flex: 1; overflow-y: auto; padding-bottom: 120px; }
         
-        .glass-card { background: #FFFFFF; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 1px rgba(0,0,0,0.1); padding: 1.25rem; margin-bottom: 1rem; }
+        /* The container stays fixed to the screen size */
+        body, html { 
+            background-color: #F8FAFC; 
+            color: #1E293B; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            margin: 0; 
+            height: 100%;
+            overflow: hidden; 
+        }
+
+        .app-container { 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            position: relative; 
+        }
+
+        /* This is the magic fix for scrolling */
+        .app-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; /* Smooth scroll for iOS */
+            padding-bottom: 140px; /* Extra space so content clears the Nav + FAB */
+        }
         
-        /* Navigation (4 TABS) */
+        .glass-card { 
+            background: #FFFFFF; 
+            border-radius: 1.5rem; 
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 1px rgba(0,0,0,0.1); 
+            padding: 1.25rem; 
+            margin-bottom: 1rem; 
+        }
+        
         .tab-view { display: none; }
         .tab-view.active { display: block; animation: fadeIn 0.3s ease; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Navigation Dock */
         .nav-dock { 
             position: fixed; bottom: 0; width: 100%; 
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px);
             border-top: 1px solid rgba(0,0,0,0.05);
             display: grid; grid-template-columns: repeat(4, 1fr); 
-            padding: 12px 0 25px 0; z-index: 1000; 
+            padding: 12px 0 30px 0; z-index: 1000; 
         }
         .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #94A3B8; transition: 0.3s; background: none; border: none; outline: none; }
         .nav-btn.active { color: #2563EB; }
 
-        .segment-pill { background: #F1F5F9; color: #64748B; padding: 4px 12px; border-radius: 99px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+        .segment-pill { background: #F1F5F9; color: #64748B; padding: 6px 14px; border-radius: 99px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; }
         .segment-pill.active { background: #2563EB; color: #FFFFFF; }
 
         /* FLOATING PADDLEPAL */
@@ -38,14 +68,13 @@
             position: fixed; bottom: 100px; right: 20px;
             width: 65px; height: 65px;
             background: #FFFFFF; border-radius: 50%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             border: 2px solid #F1F5F9; z-index: 2000;
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .paddlepal-fab:active { transform: scale(0.9); }
-        .paddlepal-fab img { width: 85%; height: 85%; object-fit: contain; }
+        .paddlepal-fab img { width: 85%; height: 85%; object-fit: contain; border-radius: 50%; }
 
+        /* Assistant Overlay */
         .ai-overlay {
             position: fixed; top: 100%; left: 0; width: 100%; height: 100%;
             background: white; z-index: 3000;
@@ -58,13 +87,13 @@
 <body>
 
     <div class="app-container">
-        <header class="px-6 py-6 flex justify-between items-center bg-white border-b border-slate-100">
+        <header class="px-6 py-6 flex justify-between items-center bg-white border-b border-slate-100 shrink-0">
             <div>
                 <h1 id="viewTitle" class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">COACH <span class="text-blue-600">HUB</span></h1>
-                <p id="viewSubtitle" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">v2.1 Business Suite</p>
+                <p id="viewSubtitle" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">v2.2 Business Suite</p>
             </div>
-            <div class="flex gap-2">
-                 <button onclick="switchTab('business')" class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100">💰</button>
+            <div class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100 font-bold text-blue-600">
+                💰
             </div>
         </header>
 
@@ -73,7 +102,7 @@
             <div id="view-arena" class="tab-view pt-10 text-center">
                 <div class="glass-card">
                     <h2 class="text-lg font-black uppercase mb-2">Live Match Control</h2>
-                    <p class="text-xs text-slate-400">Sync with Repository 1 for match scoring.</p>
+                    <p class="text-xs text-slate-400">Match scoring engine stand-by...</p>
                 </div>
             </div>
 
@@ -82,59 +111,69 @@
                 <div class="glass-card">
                     <div class="flex justify-between items-center mb-3">
                         <h3 class="text-xs font-black uppercase tracking-wider">Attendance & Billing</h3>
-                        <span class="text-[9px] bg-green-100 text-green-600 px-2 py-1 rounded font-bold uppercase">Live Sync</span>
+                        <span class="text-[9px] bg-green-100 text-green-600 px-2 py-1 rounded font-bold uppercase italic">Syncing...</span>
                     </div>
-                    <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-xl">
+                    <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl">
                         <div class="flex-1">
                             <p class="text-[9px] font-bold text-slate-400 uppercase">This Week</p>
-                            <p class="text-lg font-black italic" id="attendanceCount">14 Sessions</p>
+                            <p class="text-lg font-black italic">14 Sessions</p>
                         </div>
-                        <div class="h-8 w-[1px] bg-slate-200"></div>
+                        <div class="h-8 w-[px] bg-slate-200"></div>
                         <div class="flex-1">
                             <p class="text-[9px] font-bold text-slate-400 uppercase">Total Value</p>
-                            <p class="text-lg font-black text-blue-600" id="totalValue">R 8,200</p>
+                            <p class="text-lg font-black text-blue-600">R 8,200</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="glass-card">
                     <h3 class="text-xs font-black uppercase tracking-wider mb-3">Smart Broadcast</h3>
-                    <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                    <div class="flex gap-2 mb-4 overflow-x-auto pb-2 no-scrollbar">
                         <div class="segment-pill active" onclick="setPill(this)">All Students</div>
                         <div class="segment-pill" onclick="setPill(this)">Unpaid Only</div>
                         <div class="segment-pill" onclick="setPill(this)">Elite Squad</div>
                         <div class="segment-pill" onclick="setPill(this)">Low Attendance</div>
                     </div>
-                    <textarea id="broadcastMsg" class="w-full bg-slate-50 p-4 rounded-2xl text-xs h-24 mb-3 border-none outline-none" placeholder="Type message for selected segment..."></textarea>
-                    <button onclick="sendBroadcast()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-xs shadow-lg shadow-blue-200">SEND WHATSAPP BROADCAST</button>
+                    <textarea id="broadcastMsg" class="w-full bg-slate-50 p-4 rounded-2xl text-sm h-28 mb-3 border-none outline-none focus:ring-2 ring-blue-100" placeholder="Type group update here..."></textarea>
+                    <button onclick="sendBroadcast()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-xs shadow-lg shadow-blue-100 active:scale-95 transition">SEND WHATSAPP BROADCAST</button>
                 </div>
 
                 <div class="glass-card border-l-4 border-yellow-400">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase mb-2">Coach Reminders</h3>
-                    <div class="space-y-2" id="reminderContainer">
-                        <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-lg">
-                            <input type="checkbox" class="w-4 h-4 accent-blue-600">
-                            <span class="text-xs font-medium">Order new overgrips (Box of 30)</span>
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase mb-3">Coach Reminders</h3>
+                    <div class="space-y-3" id="reminderContainer">
+                        <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl">
+                            <input type="checkbox" class="w-5 h-5 rounded-lg accent-blue-600">
+                            <span class="text-sm font-medium">Order new overgrips (Box of 30)</span>
                         </div>
-                        <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-lg">
-                            <input type="checkbox" class="w-4 h-4 accent-blue-600">
-                            <span class="text-xs font-medium">Invoicing for Constantia Hub Tuesday group</span>
+                        <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl">
+                            <input type="checkbox" class="w-5 h-5 rounded-lg accent-blue-600">
+                            <span class="text-sm font-medium">Invoicing for Constantia Hub Tuesday</span>
                         </div>
+                        <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl">
+                            <input type="checkbox" class="w-5 h-5 rounded-lg accent-blue-600">
+                            <span class="text-sm font-medium">Review Marcus Padel's Backhand Film</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <h3 class="text-xs font-black uppercase tracking-wider mb-3">Recent Invoices</h3>
+                    <div class="space-y-2 opacity-50">
+                        <div class="flex justify-between text-xs font-bold"><span>Sarah J.</span><span>R 650</span></div>
+                        <div class="flex justify-between text-xs font-bold"><span>Mike W.</span><span>R 1,200</span></div>
                     </div>
                 </div>
             </div>
 
             <div id="view-students" class="tab-view space-y-4">
                 <div class="glass-card">
-                    <h3 class="text-xs font-black uppercase mb-4">Academy Roster</h3>
-                    <div id="studentList" class="space-y-3">
-                        <p class="text-[10px] text-slate-400 italic">No students added yet.</p>
-                    </div>
+                    <h3 class="text-xs font-black uppercase mb-4 text-center">Student Roster</h3>
+                    <p class="text-xs text-slate-400 text-center">Player database loading...</p>
                 </div>
             </div>
 
             <div id="view-tourney" class="tab-view pt-10 text-center">
-                <p class="opacity-30 italic">Tournament Brackets Engine Ready</p>
+                <p class="opacity-30 italic">Tournament Brackets Standby</p>
             </div>
         </div>
 
@@ -147,12 +186,12 @@
                 <h2 class="text-2xl font-black italic uppercase">Paddle<span class="text-blue-600">Pal</span></h2>
                 <button onclick="toggleAI()" class="text-slate-400 text-2xl font-bold">✕</button>
             </div>
-            <div class="flex-1 bg-slate-50 rounded-3xl p-6 mb-4">
-                <p class="text-sm font-medium italic text-slate-500">"Hey Coach! Everything is running smoothly. 14 sessions logged this week. Need help with invoicing?"</p>
+            <div class="flex-1 bg-slate-50 rounded-3xl p-8 mb-6">
+                <p class="text-lg font-medium italic text-slate-500 leading-relaxed">"Hey Coach! Everything is running smoothly. Ready to crush the morning sessions?"</p>
             </div>
             <div class="grid grid-cols-1 gap-3">
-                <button onclick="alert('Generating Report...')" class="bg-blue-600 text-white p-4 rounded-2xl text-xs font-bold uppercase">Daily Briefing</button>
-                <button onclick="alert('Opening Student Notes...')" class="bg-slate-900 text-white p-4 rounded-2xl text-xs font-bold uppercase">Quick Note</button>
+                <button onclick="alert('Daily Briefing...')" class="bg-blue-600 text-white p-5 rounded-2xl text-xs font-bold uppercase tracking-widest">Daily Briefing</button>
+                <button onclick="alert('Quick Note...')" class="bg-slate-900 text-white p-5 rounded-2xl text-xs font-bold uppercase tracking-widest">Quick Note</button>
             </div>
         </div>
 
@@ -173,6 +212,9 @@
             
             const titles = { 'business': 'Coach Hub', 'students': 'Student Dojo', 'arena': 'Match Arena', 'tourney': 'Pro Tourney' };
             document.getElementById('viewTitle').innerHTML = titles[id].split(' ')[0] + ` <span class="text-blue-600">${titles[id].split(' ')[1]}</span>`;
+            
+            // Scroll to top when switching tabs
+            document.querySelector('.app-content').scrollTop = 0;
         }
 
         function setPill(el) {
@@ -183,7 +225,7 @@
         function sendBroadcast() {
             const msg = document.getElementById('broadcastMsg').value;
             if(!msg) return alert("Please type a message.");
-            alert("WhatsApp Broadcast Sent: " + msg);
+            alert("WhatsApp Broadcast Sent!");
             document.getElementById('broadcastMsg').value = '';
         }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PadelPilot | The Unified Hub</title>
+    <title>PadelPilot Unified | Stable v3.4</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -13,29 +13,29 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&family=Space+Grotesk:wght@300;700&display=swap');
         
+        /* 1. LAYOUT DNA */
         body, html { 
             background-color: #F8FAFC; 
             margin: 0; height: 100%; overflow: hidden;
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
-
         .app-container { height: 100vh; display: flex; flex-direction: column; }
-        .app-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 140px; }
+        .app-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 150px; }
         
-        /* REPO 2: STUDIO WHITE GLASS */
-        .glass-card { background: #FFFFFF; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 1px rgba(0,0,0,0.1); padding: 1.25rem; margin-bottom: 1rem; }
-        
-        /* REPO 1: ARENA DARK STYLE */
-        #view-arena { 
-            background: #0f172a; 
-            font-family: 'Space Grotesk', sans-serif; 
-            color: white; 
-            min-height: 100%;
-        }
+        /* 2. TAB TRANSITIONS */
+        .tab-view { display: none; height: 100%; }
+        .tab-view.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 3. ARENA (DARK CONSOLE) STYLES */
+        #view-arena { background: #0f172a; font-family: 'Space Grotesk', sans-serif; color: white; }
         .arena-glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
         .editable-pass-input { background: transparent; border: none; font-weight: 700; color: white; outline: none; width: 100%; }
+        
+        /* 4. COACH HUB (STUDIO WHITE) STYLES */
+        .glass-card { background: #FFFFFF; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0,0,0,0.03), 0 0 1px rgba(0,0,0,0.1); padding: 1.25rem; margin-bottom: 1rem; }
 
-        /* NAV DOCK */
+        /* 5. NAVIGATION DOCK */
         .nav-dock { 
             position: fixed; bottom: 0; width: 100%; 
             background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
@@ -43,167 +43,188 @@
             display: grid; grid-template-columns: repeat(4, 1fr); 
             padding: 12px 0 35px 0; z-index: 1000; 
         }
-        .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #94A3B8; transition: 0.3s; background: none; border: none; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #94A3B8; background: none; border: none; outline: none; transition: 0.3s; }
         .nav-btn.active { color: #2563EB; }
 
-        .tab-view { display: none; }
-        .tab-view.active { display: block; }
-        
-        /* PADDLEPAL FAB */
-        .paddlepal-fab { position: fixed; bottom: 110px; right: 20px; width: 65px; height: 65px; background: #FFFFFF; border-radius: 50%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2px solid #F1F5F9; z-index: 2000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        /* 6. PADDLEPAL FAB */
+        .paddlepal-fab { position: fixed; bottom: 110px; right: 20px; width: 68px; height: 68px; background: #FFFFFF; border-radius: 50%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 2px solid #F1F5F9; z-index: 2000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         .paddlepal-fab img { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+<div class="app-container">
+    <div class="app-content">
         
-        <div class="app-content">
-            
-            <div id="view-arena" class="tab-view active">
-                <div class="bg-gray-900/40 backdrop-blur-md p-8 rounded-b-[2.8rem] text-center mb-6">
-                    <h1 id="arenaTitle" class="text-4xl font-black italic tracking-tighter uppercase leading-none">THE <span class="text-yellow-400">ARENA</span></h1>
-                    <p class="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 mt-2">Live Session Control</p>
-                </div>
-
-                <div class="px-4 space-y-6">
-                    <div class="arena-glass p-5 rounded-[2rem] shadow-xl">
-                        <div class="flex justify-between items-center mb-4">
-                            <div class="w-1/2">
-                                <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-1">📍 Location</p>
-                                <input id="locInput" type="text" value="Constantia Hub" class="editable-pass-input text-lg">
-                            </div>
-                            <div class="text-right border-l border-white/10 pl-6 w-1/2">
-                                <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-1">⏰ Start Time</p>
-                                <input id="timeInput" type="text" value="" class="editable-pass-input text-lg text-right">
-                            </div>
-                        </div>
-                        <button onclick="handleCheckIn()" id="checkInBtn" class="w-full bg-green-500/20 border border-green-500/50 text-green-400 font-black py-3 rounded-xl uppercase italic text-xs transition-all active:scale-95">
-                            Confirm Arrival ✅
-                        </button>
-                    </div>
-
-                    <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-700 shadow-xl">
-                        <div class="flex gap-2 mb-4">
-                            <input id="meetNameInput" type="text" class="flex-1 bg-black/50 border border-gray-700 p-2 rounded-lg text-white text-sm outline-none" placeholder="Meet Name">
-                            <button id="connectMeetBtn" class="bg-blue-600 px-3 rounded-lg text-[10px] font-bold uppercase">Connect</button>
-                        </div>
-                        <textarea id="playersInput" class="w-full bg-black/50 border border-gray-700 p-3 rounded-xl h-32 outline-none text-white text-sm mb-4" placeholder="Enter players..."></textarea>
-                        <button id="savePlayersBtn" class="w-full bg-green-600/80 text-white font-bold py-2 rounded-xl text-[10px] uppercase border border-green-400/50 mb-4">💾 Sync to Cloud</button>
-                        <button id="generateBtn" class="w-full bg-yellow-400 text-blue-900 font-black py-3 rounded-xl uppercase shadow-lg">Generate Round</button>
-                    </div>
-
-                    <div id="matchesSection" class="hidden pb-10">
-                        <div id="matchesContainer" class="grid grid-cols-1 gap-3"></div>
-                    </div>
-                </div>
+        <div id="view-arena" class="tab-view active">
+            <div class="bg-gray-900/40 backdrop-blur-md p-8 rounded-b-[2.8rem] text-center mb-6 border-b border-white/5">
+                <h1 id="arenaTitle" class="text-4xl font-black italic tracking-tighter uppercase leading-none">THE <span class="text-yellow-400">ARENA</span></h1>
+                <p class="text-[10px] uppercase tracking-[0.3em] font-bold opacity-60 mt-2">Live Session Control</p>
             </div>
 
-            <div id="view-business" class="tab-view px-6 pt-10">
-                <header class="mb-6">
-                    <h1 class="text-2xl font-extrabold text-slate-900 uppercase">Coach <span class="text-blue-600">Hub</span></h1>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Business Suite v3.2</p>
-                </header>
-
-                <div class="glass-card">
-                    <h3 class="text-xs font-black uppercase text-slate-400 mb-2">Estimated Revenue</h3>
-                    <p class="text-3xl font-black italic text-slate-900">R 8,200</p>
+            <div class="px-5 space-y-6">
+                <div class="arena-glass p-5 rounded-[2rem] shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="w-1/2">
+                            <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-1">📍 Location</p>
+                            <input id="locInput" type="text" value="Constantia Hub" class="editable-pass-input text-lg">
+                        </div>
+                        <div class="text-right border-l border-white/10 pl-6 w-1/2">
+                            <p class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mb-1">⏰ Start Time</p>
+                            <input id="timeInput" type="text" value="" class="editable-pass-input text-lg text-right">
+                        </div>
+                    </div>
+                    <button onclick="handleCheckIn()" id="checkInBtn" class="w-full bg-green-500/20 border border-green-500/50 text-green-400 font-black py-3 rounded-xl uppercase italic text-xs transition-all active:scale-95">Confirm Arrival ✅</button>
                 </div>
 
-                <div class="glass-card">
-                    <h3 class="text-xs font-black uppercase text-slate-400 mb-4 tracking-widest">Broadcast</h3>
-                    <textarea class="w-full bg-slate-50 p-4 rounded-2xl text-sm h-24 mb-3 outline-none" placeholder="Type message to students..."></textarea>
-                    <button class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-xs uppercase shadow-lg shadow-blue-100">Send WhatsApp</button>
+                <div class="bg-gray-900/80 p-6 rounded-3xl border border-gray-700 shadow-xl">
+                    <div class="flex gap-2 mb-4">
+                        <input id="meetNameInput" type="text" class="flex-1 bg-black/50 border border-gray-700 p-2 rounded-lg text-white text-sm outline-none" placeholder="Meet Name">
+                        <button id="connectMeetBtn" class="bg-blue-600 px-4 rounded-lg text-[10px] font-bold uppercase">Connect</button>
+                    </div>
+                    <textarea id="playersInput" class="w-full bg-black/50 border border-gray-700 p-3 rounded-xl h-32 outline-none text-white text-sm mb-4" placeholder="Enter players (one per line)..."></textarea>
+                    <button id="savePlayersBtn" class="w-full bg-green-600/20 text-green-400 font-bold py-2 rounded-xl text-[10px] uppercase border border-green-500/30 mb-3">💾 Sync to Cloud</button>
+                    <button onclick="generateMatch()" id="generateBtn" class="w-full bg-yellow-400 text-blue-900 font-black py-4 rounded-xl uppercase shadow-lg transition-transform active:scale-95">Generate Round</button>
+                </div>
+
+                <div id="matchesSection" class="hidden pb-20">
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <h2 id="roundDisplay" class="text-xl font-black italic uppercase text-yellow-400 tracking-tighter">Round 1</h2>
+                        <button onclick="generateMatch()" class="bg-emerald-500 text-white px-4 py-1 rounded-full font-bold text-[10px] uppercase">Next Round</button>
+                    </div>
+                    <div id="matchesContainer" class="space-y-3"></div>
                 </div>
             </div>
-
-            <div id="view-students" class="tab-view pt-20 text-center opacity-30 italic">Student Dojo...</div>
-            <div id="view-tourney" class="tab-view pt-20 text-center opacity-30 italic">Tourney...</div>
-
         </div>
 
-        <button class="paddlepal-fab" onclick="alert('Racky: Ready to assist!')">
-            <img src="60117.jpg" alt="PaddlePal">
-        </button>
+        <div id="view-business" class="tab-view px-6 pt-10">
+            <header class="mb-6">
+                <h1 class="text-2xl font-extrabold text-slate-900 uppercase">Coach <span class="text-blue-600">Hub</span></h1>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest text-left">Academy Intelligence</p>
+            </header>
+            <div class="glass-card">
+                <h3 class="text-[10px] font-black uppercase text-slate-400 mb-1 tracking-widest">Est. Revenue</h3>
+                <p class="text-3xl font-black italic text-slate-900">R 8,200</p>
+            </div>
+            <div class="glass-card">
+                <h3 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest">Quick Broadcast</h3>
+                <textarea class="w-full bg-slate-50 p-4 rounded-2xl text-sm h-24 mb-3 border border-slate-100 outline-none" placeholder="Message for players..."></textarea>
+                <button class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-xs uppercase shadow-xl shadow-blue-200">Send via WhatsApp</button>
+            </div>
+        </div>
 
-        <nav class="nav-dock">
-            <button onclick="switchTab('arena')" class="nav-btn active" id="nav-arena"><span>🎾</span><span class="text-[8px] font-bold uppercase">Arena</span></button>
-            <button onclick="switchTab('business')" class="nav-btn" id="nav-business"><span>📊</span><span class="text-[8px] font-bold uppercase">Hub</span></button>
-            <button onclick="switchTab('students')" class="nav-btn"><span>👥</span><span class="text-[8px] font-bold uppercase">Dojo</span></button>
-            <button onclick="switchTab('tourney')" class="nav-btn"><span>🏆</span><span class="text-[8px] font-bold uppercase">Tourney</span></button>
-        </nav>
+        <div id="view-students" class="tab-view pt-20 text-center opacity-30 italic font-bold">DOJO COMING SOON</div>
+        <div id="view-tourney" class="tab-view pt-20 text-center opacity-30 italic font-bold">TOURNEY COMING SOON</div>
+
     </div>
 
-    <script>
-        // --- FIREBASE CONFIG ---
-        const firebaseConfig = {
-            apiKey: "AiZaSyAKJywAbSKpKHqOs1a-_nQVBuQGkFmF4d4",
-            authDomain: "padelpilot-4531f.firebaseapp.com",
-            databaseURL: "https://padelpilot-4531f-default-rtdb.firebaseio.com",
-            projectId: "padelpilot-4531f",
-            storageBucket: "padelpilot-4531f.appspot.com",
-            messagingSenderId: "866905934997",
-            appId: "1:866905934997:web:97cb8ebc4ed35f9e41f9c",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+    <button class="paddlepal-fab" onclick="alert('PaddlePal: Ready to help!')">
+        <img src="60117.jpg" alt="Mascot">
+    </button>
 
-        // --- 12HR CLOCK LOGIC ---
-        function get12HourTime() {
-            const now = new Date();
-            let hours = now.getHours();
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            return `${hours}:${minutes} ${ampm}`;
-        }
+    <nav class="nav-dock">
+        <button onclick="switchTab('arena')" class="nav-btn active" id="nav-arena">
+            <span class="text-xl">🎾</span><span class="text-[8px] font-bold uppercase mt-1">Arena</span>
+        </button>
+        <button onclick="switchTab('business')" class="nav-btn" id="nav-business">
+            <span class="text-xl">📊</span><span class="text-[8px] font-bold uppercase mt-1">Hub</span>
+        </button>
+        <button onclick="switchTab('students')" class="nav-btn" id="nav-students">
+            <span class="text-xl">👥</span><span class="text-[8px] font-bold uppercase mt-1">Dojo</span>
+        </button>
+        <button onclick="switchTab('tourney')" class="nav-btn" id="nav-tourney">
+            <span class="text-xl">🏆</span><span class="text-[8px] font-bold uppercase mt-1">Tourney</span>
+        </button>
+    </nav>
+</div>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('timeInput').value = get12HourTime();
+<script>
+    // 1. FIREBASE INITIALIZATION
+    const firebaseConfig = {
+        apiKey: "AiZaSyAKJywAbSKpKHqOs1a-_nQVBuQGkFmF4d4",
+        authDomain: "padelpilot-4531f.firebaseapp.com",
+        databaseURL: "https://padelpilot-4531f-default-rtdb.firebaseio.com",
+        projectId: "padelpilot-4531f",
+        storageBucket: "padelpilot-4531f.appspot.com",
+        messagingSenderId: "866905934997",
+        appId: "1:866905934997:web:97cb8ebc4ed35f9e41f9c",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 2. UTILITIES & GLOBAL STATE
+    let activeMeetId = null;
+    let currentRound = 1;
+
+    function get12HourTime() {
+        const now = new Date();
+        let hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+
+    // 3. UI LOGIC
+    function switchTab(id) {
+        document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('view-' + id).classList.add('active');
+        if(document.getElementById('nav-' + id)) document.getElementById('nav-' + id).classList.add('active');
+    }
+
+    function handleCheckIn() {
+        const time = get12HourTime();
+        const btn = document.getElementById('checkInBtn');
+        btn.innerText = `ON-SITE @ ${time} ✅`;
+        btn.className = "w-full bg-slate-700 text-white font-black py-3 rounded-xl uppercase italic text-xs";
+        if(activeMeetId) db.ref('meets/' + activeMeetId).update({ lastCheckIn: time });
+    }
+
+    // 4. MATCH ENGINE
+    function generateMatch() {
+        const input = document.getElementById('playersInput').value;
+        const players = input.split('\n').filter(p => p.trim() !== "");
+        if (players.length < 4) return alert("Need 4+ players!");
+
+        const shuffled = [...players].sort(() => 0.5 - Math.random());
+        const container = document.getElementById('matchesContainer');
+        
+        container.innerHTML = `
+            <div class="arena-glass p-4 rounded-2xl flex justify-between items-center border border-white/10 shadow-lg">
+                <div class="text-[10px] font-bold w-1/3 text-yellow-400 uppercase">${shuffled[0]} & ${shuffled[1]}</div>
+                <div class="flex gap-2">
+                    <input type="number" class="w-10 bg-black/40 rounded p-2 text-center text-white border border-white/10" placeholder="0">
+                    <input type="number" class="w-10 bg-black/40 rounded p-2 text-center text-white border border-white/10" placeholder="0">
+                </div>
+                <div class="text-[10px] font-bold w-1/3 text-right text-blue-400 uppercase">${shuffled[2]} & ${shuffled[3]}</div>
+            </div>
+        `;
+        document.getElementById('matchesSection').classList.remove('hidden');
+        document.getElementById('roundDisplay').innerText = `Round ${currentRound}`;
+        currentRound++;
+    }
+
+    // Initialize on Load
+    document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('timeInput').value = get12HourTime();
+    });
+
+    // Connect Meet Logic
+    document.getElementById('connectMeetBtn').onclick = () => {
+        const name = document.getElementById('meetNameInput').value;
+        if (!name) return alert("Enter a name!");
+        activeMeetId = name.replace(/\s+/g, '-').toLowerCase();
+        db.ref('meets/' + activeMeetId).on('value', (snap) => {
+            const data = snap.val();
+            if(data) {
+                document.getElementById('playersInput').value = data.players || '';
+                document.getElementById('locInput').value = data.location || '';
+            }
         });
+        alert("Connected to " + activeMeetId);
+    };
+</script>
 
-        // --- ARENA CORE FUNCTIONS ---
-        let activeMeetId = null;
-
-        function handleCheckIn() {
-            const btn = document.getElementById('checkInBtn');
-            const time = get12HourTime();
-            btn.innerText = `PLAYER ON-SITE @ ${time} ✅`;
-            btn.className = "w-full bg-slate-700 text-white font-black py-3 rounded-xl uppercase italic text-xs";
-            if(activeMeetId) db.ref('meets/' + activeMeetId).update({ lastCheckIn: time });
-        }
-
-        function switchTab(id) {
-            document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            if(document.getElementById('nav-'+id)) document.getElementById('nav-' + id).classList.add('active');
-        }
-
-        // Connect/Sync Functions from Repo 1
-        document.getElementById('connectMeetBtn').onclick = () => {
-            const name = document.getElementById('meetNameInput').value;
-            if (!name) return alert("Enter a meet name!");
-            activeMeetId = name.replace(/\s+/g, '-').toLowerCase();
-            db.ref('meets/' + activeMeetId).on('value', (snap) => {
-                const data = snap.val();
-                if(data) {
-                    document.getElementById('playersInput').value = data.players || '';
-                    document.getElementById('locInput').value = data.location || '';
-                }
-            });
-            alert("Connected to " + activeMeetId);
-        };
-
-        document.getElementById('savePlayersBtn').onclick = () => {
-            if(!activeMeetId) return alert("Connect first!");
-            db.ref('meets/' + activeMeetId).update({
-                players: document.getElementById('playersInput').value,
-                location: document.getElementById('locInput').value,
-                time: document.getElementById('timeInput').value
-            });
-            alert("Cloud Synced!");
-        };
-    </script>
 </body>
 </html>

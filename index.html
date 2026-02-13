@@ -3,38 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PadelPilot | Coach Hub Pro</title>
+    <title>PadelPilot | Coach Hub Pro+</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap');
-        
         body { background-color: #F8FAFC; color: #1E293B; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; overflow: hidden; }
         .app-container { height: 100vh; display: flex; flex-direction: column; }
         .app-content { flex: 1; overflow-y: auto; padding-bottom: 120px; }
-        
-        /* Studio White Elements */
         .glass-card { background: #FFFFFF; border-radius: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03), 0 0 1px rgba(0,0,0,0.1); padding: 1.25rem; margin-bottom: 1rem; }
-        .btn-primary { background: #2563EB; color: white; font-weight: 800; border-radius: 1rem; transition: all 0.2s; }
-        .btn-primary:active { transform: scale(0.95); opacity: 0.9; }
-        
-        .tab-view { display: none; }
-        .active-tab { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Navigation */
         .nav-dock { position: fixed; bottom: 0; width: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px); border-top: 1px solid rgba(0,0,0,0.05); display: grid; grid-template-columns: repeat(5, 1fr); padding: 12px 0 25px 0; z-index: 1000; }
         .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #94A3B8; transition: 0.3s; }
         .nav-btn.active { color: #2563EB; }
-
-        /* Calendar & Inputs */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .cal-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; border-radius: 8px; background: #F1F5F9; }
-        .cal-day.active { background: #2563EB; color: white; }
-        
-        input, textarea, select { background: #F1F5F9; border: none; padding: 12px; border-radius: 10px; font-size: 14px; outline: none; width: 100%; }
+        .segment-pill { background: #F1F5F9; color: #64748B; padding: 4px 12px; border-radius: 99px; font-size: 10px; font-weight: 700; cursor: pointer; }
+        .segment-pill.active { background: #2563EB; color: #FFFFFF; }
     </style>
 </head>
 <body>
@@ -43,143 +26,71 @@
         <header class="px-6 py-6 flex justify-between items-center bg-white border-b border-slate-100">
             <div>
                 <h1 id="viewTitle" class="text-xl font-extrabold tracking-tight text-slate-900 uppercase">COACH <span class="text-blue-600">HUB</span></h1>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Premium Academy Ops</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">v2.1 Business Suite</p>
             </div>
-            <button onclick="openBroadcast()" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center border border-blue-100">
-                <span class="text-lg">📣</span>
-            </button>
+            <div class="flex gap-2">
+                 <button class="w-10 h-10 bg-slate-50 rounded-full flex items-center justify-center border border-slate-100">💰</button>
+            </div>
         </header>
 
         <div class="app-content px-5 pt-4">
             
-            <div id="view-business" class="tab-view active-tab space-y-4">
+            <div id="view-business" class="active-tab space-y-4">
                 
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="glass-card">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Revenue (MTD)</p>
-                        <p class="text-2xl font-extrabold text-slate-900">R 14,250</p>
-                        <p class="text-[9px] text-green-500 font-bold mt-1">↑ 12% vs last month</p>
+                <div class="glass-card">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-black uppercase tracking-wider">Attendance & Billing</h3>
+                        <span class="text-[9px] bg-green-100 text-green-600 px-2 py-1 rounded font-bold uppercase">Live Sync</span>
                     </div>
-                    <div class="glass-card">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Outstanding</p>
-                        <p class="text-2xl font-extrabold text-red-500">R 3,400</p>
-                        <button class="text-[9px] font-bold text-blue-600 underline mt-1">NUDGE ALL</button>
+                    <div class="flex items-center gap-4 bg-slate-50 p-3 rounded-xl">
+                        <div class="flex-1">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">This Week</p>
+                            <p class="text-lg font-black italic">14 Sessions</p>
+                        </div>
+                        <div class="h-8 w-[1px] bg-slate-200"></div>
+                        <div class="flex-1">
+                            <p class="text-[9px] font-bold text-slate-400 uppercase">Total Value</p>
+                            <p class="text-lg font-black text-blue-600">R 8,200</p>
+                        </div>
                     </div>
                 </div>
 
                 <div class="glass-card">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xs font-black uppercase tracking-wider">Academy Schedule</h3>
-                        <span class="text-[10px] font-bold text-slate-400">Feb 2026</span>
+                    <h3 class="text-xs font-black uppercase tracking-wider mb-3">Smart Broadcast</h3>
+                    <div class="flex gap-2 mb-4 overflow-x-auto">
+                        <div class="segment-pill active">All Students</div>
+                        <div class="segment-pill">Unpaid Only</div>
+                        <div class="segment-pill">Elite Squad</div>
+                        <div class="segment-pill">Low Attendance</div>
                     </div>
-                    <div class="calendar-grid mb-4">
-                        <div class="cal-day">9</div><div class="cal-day">10</div><div class="cal-day">11</div>
-                        <div class="cal-day">12</div><div class="cal-day active">13</div><div class="cal-day">14</div><div class="cal-day">15</div>
-                    </div>
+                    <textarea class="w-full bg-slate-50 p-4 rounded-2xl text-xs h-24 mb-3 border-none outline-none" placeholder="Type message for selected segment..."></textarea>
+                    <button class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-xs shadow-lg shadow-blue-200">SEND WHATSAPP BROADCAST</button>
+                </div>
+
+                <div class="glass-card border-l-4 border-yellow-400">
+                    <h3 class="text-[10px] font-black text-slate-400 uppercase mb-2">Coach Reminders</h3>
                     <div class="space-y-2">
-                        <input type="text" id="reminderText" placeholder="Add daily reminder...">
-                        <button onclick="addReminder()" class="btn-primary w-full py-2 text-xs">SAVE REMINDER</button>
+                        <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-lg">
+                            <input type="checkbox" class="w-4 h-4 accent-blue-600">
+                            <span class="text-xs font-medium">Order new overgrips (Box of 30)</span>
+                        </div>
+                        <div class="flex items-center gap-3 bg-slate-50 p-2 rounded-lg">
+                            <input type="checkbox" class="w-4 h-4 accent-blue-600">
+                            <span class="text-xs font-medium">Invoicing for Constantia Hub Tuesday group</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-card">
-                    <h3 class="text-xs font-black uppercase tracking-wider mb-4">Communication</h3>
-                    <div class="flex gap-2">
-                        <button class="flex-1 bg-slate-100 p-3 rounded-xl text-center active:scale-95 transition" onclick="alert('Select Student')">
-                            <span class="block text-xl mb-1">👤</span>
-                            <span class="text-[10px] font-bold uppercase">Individual</span>
-                        </button>
-                        <button class="flex-1 bg-slate-100 p-3 rounded-xl text-center active:scale-95 transition" onclick="openBroadcast()">
-                            <span class="block text-xl mb-1">📢</span>
-                            <span class="text-[10px] font-bold uppercase">Broadcast</span>
-                        </button>
-                    </div>
-                </div>
             </div>
-
-            <div id="view-students" class="tab-view space-y-4">
-                <div class="glass-card">
-                    <div class="flex justify-between items-center mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-600 text-white rounded-xl flex items-center justify-center font-black">MP</div>
-                            <div>
-                                <p class="text-sm font-black uppercase">Marcus Padel</p>
-                                <p class="text-[9px] font-bold text-blue-500 uppercase">Advanced Squad</p>
-                            </div>
-                        </div>
-                        <button class="text-xs font-bold text-slate-400 border border-slate-200 px-3 py-1 rounded-lg">Profile</button>
-                    </div>
-                    
-                    <div class="grid grid-cols-3 gap-2 mb-4">
-                        <div class="bg-slate-50 p-2 rounded-lg text-center">
-                            <p class="text-[8px] font-bold text-slate-400 uppercase">Power</p>
-                            <p class="text-xs font-black">82%</p>
-                        </div>
-                        <div class="bg-slate-50 p-2 rounded-lg text-center">
-                            <p class="text-[8px] font-bold text-slate-400 uppercase">Tactics</p>
-                            <p class="text-xs font-black">64%</p>
-                        </div>
-                        <div class="bg-slate-50 p-2 rounded-lg text-center">
-                            <p class="text-[8px] font-bold text-slate-400 uppercase">Form</p>
-                            <p class="text-xs font-black text-green-500">↑</p>
-                        </div>
-                    </div>
-
-                    <div class="space-y-2">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Coach Notes (Sent to Student Hub)</p>
-                        <textarea class="text-xs h-20" placeholder="Focus on bandeja contact point..."></textarea>
-                        <button class="btn-primary w-full py-2 text-[10px]">SYNC TO STUDENT APP</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-arena" class="tab-view pt-20 text-center opacity-30 italic">Live Arena Controller</div>
-            <div id="view-tourney" class="tab-view pt-20 text-center opacity-30 italic">Tournament Engine</div>
-            <div id="view-hub" class="tab-view pt-20 text-center opacity-30 italic">Racky Assistant</div>
         </div>
 
         <nav class="nav-dock">
-            <button onclick="switchTab('arena', 'The Arena')" class="nav-btn" id="btn-arena">
-                <span class="text-xl">🎾</span><span class="text-[8px] font-bold uppercase">Arena</span>
-            </button>
-            <button onclick="switchTab('business', 'Coach Hub')" class="nav-btn active" id="btn-business">
-                <span class="text-xl">📊</span><span class="text-[8px] font-bold uppercase">Coach Hub</span>
-            </button>
-            <button onclick="switchTab('students', 'Student Dojo')" class="nav-btn" id="btn-students">
-                <span class="text-xl">👥</span><span class="text-[8px] font-bold uppercase">Students</span>
-            </button>
-            <button onclick="switchTab('tourney', 'Pro Tourney')" class="nav-btn" id="btn-tourney">
-                <span class="text-xl">🏆</span><span class="text-[8px] font-bold uppercase">Tourney</span>
-            </button>
-            <button onclick="switchTab('hub', 'Racky AI')" class="nav-btn" id="btn-hub">
-                <span class="text-xl">🤖</span><span class="text-[8px] font-bold uppercase">Hub</span>
-            </button>
+            <button class="nav-btn"><span class="text-xl">🎾</span><span class="text-[8px] font-bold uppercase">Arena</span></button>
+            <button class="nav-btn active"><span class="text-xl">📊</span><span class="text-[8px] font-bold uppercase">Coach Hub</span></button>
+            <button class="nav-btn"><span class="text-xl">👥</span><span class="text-[8px] font-bold uppercase">Students</span></button>
+            <button class="nav-btn"><span class="text-xl">🏆</span><span class="text-[8px] font-bold uppercase">Tourney</span></button>
+            <button class="nav-btn"><span class="text-xl">🤖</span><span class="text-[8px] font-bold uppercase">Hub</span></button>
         </nav>
     </div>
-
-    <script>
-        function switchTab(tabId, title) {
-            document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active-tab'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('view-' + tabId).classList.add('active-tab');
-            document.getElementById('btn-' + tabId).classList.add('active');
-            
-            const [first, ...rest] = title.split(' ');
-            document.getElementById('viewTitle').innerHTML = `${first} <span class="text-blue-600">${rest.join(' ')}</span>`;
-        }
-
-        function openBroadcast() {
-            const msg = prompt("Enter broadcast message for all students:");
-            if(msg) alert("Broadcasting to all students via WhatsApp...");
-        }
-
-        function addReminder() {
-            const text = document.getElementById('reminderText').value;
-            if(text) {
-                alert("Reminder Saved: " + text);
-                document.getElementById('reminderText').value = '';
-            }
-        }
-    </script>
 </body>
 </html>

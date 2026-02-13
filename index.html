@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PadelPilot | ACADEMY SANDBOX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PadelPilot Mobile Sandbox</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
@@ -11,239 +11,208 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&display=swap');
-        body { background-color: #0f172a; color: white; font-family: 'Space Grotesk', sans-serif; padding-bottom: 100px; }
-        .master-bg { background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95)), url('59431.jpg'); background-size: cover; min-height: 100vh; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
-        .tab-view { display: none; }
-        .active-tab { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .nav-dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 550px; z-index: 100; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
         
-        /* Trainer Specific */
-        .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .input-dark { background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); border-radius: 0.75rem; padding: 0.75rem; color: white; outline: none; }
-        .btn-cyan { background: #22d3ee; color: #0891b2; font-weight: 900; padding: 0.75rem; border-radius: 0.75rem; transition: all 0.2s; }
-        .btn-cyan:hover { background: #67e8f9; transform: translateY(-2px); }
+        :root { --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
+
+        body { 
+            background-color: #020617; color: white; font-family: 'Space Grotesk', sans-serif; 
+            margin: 0; overflow-x: hidden; -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Mobile App "Sheet" Animation */
+        .student-sheet {
+            position: fixed; top: 100%; left: 0; width: 100%; height: 92vh;
+            background: #0f172a; border-radius: 2.5rem 2.5rem 0 0;
+            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+            z-index: 200; border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .sheet-active { transform: translateY(-100%); }
+        
+        /* App Style Elements */
+        .app-card { background: rgba(30, 41, 59, 0.5); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }
+        .nav-dock { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); padding-bottom: var(--safe-bottom); border-top: 1px solid rgba(255,255,255,0.1); }
+        
+        .badge-icon { width: 45px; height: 45px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: transform 0.2s; }
+        .badge-icon:active { scale: 0.9; }
+
+        /* Hide Scrollbars */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
-    <div class="master-bg">
-        <div class="p-6">
-            <h1 id="labTitle" class="text-3xl font-black italic text-cyan-400 mb-6 uppercase tracking-tighter">Trainer <span class="text-white">Academy</span></h1>
 
-            <div id="view-arena" class="tab-view">
-                 <p class="text-gray-500 italic">Arena Core is active in background.</p>
-            </div>
-
-            <div id="view-trainer" class="tab-view active-tab space-y-8">
-                
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div class="glass-card p-4 rounded-2xl border-green-500/30">
-                        <p class="text-[10px] uppercase font-bold text-green-400">Total Revenue</p>
-                        <p class="text-2xl font-black" id="acc-total-rev">R 0.00</p>
-                    </div>
-                    <div class="glass-card p-4 rounded-2xl border-red-500/30">
-                        <p class="text-[10px] uppercase font-bold text-red-400">Outstanding</p>
-                        <p class="text-2xl font-black" id="acc-pending">R 0.00</p>
-                    </div>
-                    <div class="glass-card p-4 rounded-2xl border-cyan-500/30">
-                        <p class="text-[10px] uppercase font-bold text-cyan-400">Total Students</p>
-                        <p class="text-2xl font-black" id="acc-student-count">0</p>
-                    </div>
-                    <div class="glass-card p-4 rounded-2xl border-purple-500/30">
-                        <p class="text-[10px] uppercase font-bold text-purple-400">Classes/Week</p>
-                        <p class="text-2xl font-black">12</p>
-                    </div>
-                </div>
-
-                <div class="admin-grid">
-                    
-                    <div class="glass-card p-6 rounded-[2rem] space-y-4">
-                        <h3 class="font-black uppercase text-sm flex items-center gap-2">
-                            👤 Student Roster <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded">Groups & Locations</span>
-                        </h3>
-                        <div class="flex gap-2">
-                            <input id="stdName" type="text" placeholder="Name" class="input-dark flex-1">
-                            <input id="stdGroup" type="text" placeholder="Group/Loc" class="input-dark w-1/3">
-                        </div>
-                        <div class="flex gap-2">
-                            <input id="stdPhone" type="text" placeholder="WhatsApp (e.g. 27...)" class="input-dark flex-1">
-                            <input id="stdPrice" type="number" placeholder="Price" class="input-dark w-1/4">
-                        </div>
-                        <button onclick="addStudent()" class="btn-cyan w-full uppercase text-xs">Register Student</button>
-                        
-                        <div id="studentList" class="space-y-2 mt-4 max-h-60 overflow-y-auto pr-2">
-                            </div>
-                    </div>
-
-                    <div class="glass-card p-6 rounded-[2rem] space-y-4">
-                        <h3 class="font-black uppercase text-sm">📅 Academy Calendar</h3>
-                        <input type="date" id="calDate" class="input-dark w-full" onchange="loadNote()">
-                        <textarea id="calNote" placeholder="Private lesson notes, court bookings, or student feedback..." class="input-dark w-full h-32"></textarea>
-                        <button onclick="saveNote()" class="w-full bg-white/10 hover:bg-white/20 p-3 rounded-xl text-xs font-bold uppercase transition">Save Daily Note</button>
-                        <p id="noteStatus" class="text-[10px] text-center text-gray-500 italic"></p>
-                    </div>
-
-                </div>
-
-                <div class="glass-card p-6 rounded-[2rem]">
-                    <h3 class="font-black uppercase text-sm mb-4">💳 Accounting & Billing</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="text-gray-500 border-b border-white/5 uppercase">
-                                    <th class="p-4">Student</th>
-                                    <th class="p-4">Group</th>
-                                    <th class="p-4">Status</th>
-                                    <th class="p-4">Balance</th>
-                                    <th class="p-4 text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="billingTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-tourney" class="tab-view">Tournament logic remains in standby.</div>
-            <div id="view-hub" class="tab-view text-center">
-                <img src="59464.jpg" class="w-32 h-32 mx-auto rounded-full border-4 border-green-500 mb-4">
-                <p id="mascotText" class="italic text-xl">"Ready to handle the business side, coach!"</p>
-            </div>
+    <header class="sticky top-0 z-50 bg-[#020617]/80 backdrop-blur-md px-6 py-4 flex justify-between items-center">
+        <div>
+            <h1 class="text-xl font-black italic text-cyan-400">PADEL<span class="text-white">PILOT</span></h1>
+            <p id="contextTitle" class="text-[10px] uppercase tracking-widest font-bold opacity-50">Academy Manager</p>
         </div>
-
-        <div class="nav-dock glass-card p-2 rounded-[2.5rem] flex justify-around items-center border border-white/10">
-            <button onclick="switchTab('arena')" class="p-3"><span class="text-xl">🎾</span></button>
-            <button onclick="switchTab('trainer')" class="p-3 text-cyan-400"><span class="text-xl">📊</span></button>
-            <button onclick="switchTab('tourney')" class="p-3 opacity-40"><span class="text-xl">🏆</span></button>
-            <button onclick="switchTab('hub')" class="p-3 opacity-40"><span class="text-xl">🤖</span></button>
+        <div class="flex gap-3">
+            <button onclick="toggleAddStudent()" class="w-10 h-10 bg-cyan-500 rounded-full flex items-center justify-center shadow-lg shadow-cyan-500/20 active:scale-90 transition-transform">
+                <span class="text-xl font-bold">+</span>
+            </button>
         </div>
+    </header>
+
+    <main class="p-4 space-y-6 pb-32">
+        
+        <section class="grid grid-cols-2 gap-3">
+            <div class="app-card p-4">
+                <p class="text-[10px] font-bold opacity-40 uppercase">Revenue (MTD)</p>
+                <p class="text-xl font-black text-green-400" id="stat-rev">R 0.00</p>
+            </div>
+            <div class="app-card p-4">
+                <p class="text-[10px] font-bold opacity-40 uppercase">Pending</p>
+                <p class="text-xl font-black text-red-400" id="stat-pending">R 0.00</p>
+            </div>
+        </section>
+
+        <section class="space-y-3">
+            <h3 class="text-xs font-bold uppercase opacity-40 ml-1">Current Squad</h3>
+            <div id="rosterContainer" class="space-y-2">
+                </div>
+        </section>
+    </main>
+
+    <div id="studentSheet" class="student-sheet p-6 shadow-2xl overflow-y-auto">
+        <div onclick="closeSheet()" class="w-12 h-1.5 bg-gray-700 rounded-full mx-auto mb-8"></div>
+        
+        <div id="sheetContent">
+            </div>
     </div>
 
+    <nav class="nav-dock flex justify-around items-center h-20">
+        <button class="flex flex-col items-center opacity-40"><span class="text-2xl">🎾</span><span class="text-[9px] font-bold uppercase mt-1">Arena</span></button>
+        <button class="flex flex-col items-center text-cyan-400"><span class="text-2xl">📊</span><span class="text-[9px] font-bold uppercase mt-1">Labs</span></button>
+        <button class="flex flex-col items-center opacity-40"><span class="text-2xl">🏆</span><span class="text-[9px] font-bold uppercase mt-1">Tourney</span></button>
+        <button class="flex flex-col items-center opacity-40"><span class="text-2xl">🤖</span><span class="text-[9px] font-bold uppercase mt-1">Hub</span></button>
+    </nav>
+
     <script>
-        // --- DATA STRUCTURE ---
+        // Data Mockup
         let students = JSON.parse(localStorage.getItem('pp_students')) || [];
-        let diary = JSON.parse(localStorage.getItem('pp_diary')) || {};
+        let activeStudent = null;
 
-        function saveToDisk() {
-            localStorage.setItem('pp_students', JSON.stringify(students));
-            localStorage.setItem('pp_diary', JSON.stringify(diary));
-            renderStudents();
-            updateAccounting();
-        }
-
-        // --- STUDENT MGMT ---
-        function addStudent() {
-            const name = document.getElementById('stdName').value;
-            const group = document.getElementById('stdGroup').value;
-            const phone = document.getElementById('stdPhone').value;
-            const price = document.getElementById('stdPrice').value;
-
-            if(!name || !phone) return alert("Name and Phone required!");
-
-            students.push({
-                id: Date.now(),
-                name, group, phone, price: parseFloat(price) || 0,
-                paid: false,
-                lastAnalysis: ""
+        function renderRoster() {
+            const container = document.getElementById('rosterContainer');
+            container.innerHTML = '';
+            students.forEach(s => {
+                const card = document.createElement('div');
+                card.className = "app-card p-4 flex justify-between items-center active:bg-white/5 transition-colors";
+                card.onclick = () => openStudent(s.id);
+                card.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-lg">
+                            ${s.name.charAt(0)}
+                        </div>
+                        <div>
+                            <p class="font-bold uppercase text-sm">${s.name}</p>
+                            <p class="text-[10px] font-bold text-cyan-500 uppercase">${s.group || 'PROSPECT'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[9px] font-bold opacity-30 uppercase">${s.paid ? 'Paid' : 'Due'}</p>
+                        <p class="text-sm font-black ${s.paid ? 'text-green-400' : 'text-red-400'}">R ${s.price}</p>
+                    </div>
+                `;
+                container.appendChild(card);
             });
-
-            saveToDisk();
-            document.querySelectorAll('.input-dark').forEach(i => i.value = '');
+            updateStats();
         }
 
-        function removeStudent(id) {
-            students = students.filter(s => s.id !== id);
-            saveToDisk();
+        function openStudent(id) {
+            activeStudent = students.find(s => s.id === id);
+            const sheet = document.getElementById('studentSheet');
+            const content = document.getElementById('sheetContent');
+            
+            content.innerHTML = `
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="text-3xl font-black uppercase italic">${activeStudent.name}</h2>
+                        <span class="bg-cyan-500/20 text-cyan-400 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">${activeStudent.group}</span>
+                    </div>
+                    <button onclick="togglePaid(${activeStudent.id})" class="text-[10px] font-bold border border-white/10 px-4 py-2 rounded-xl uppercase">
+                        Mark as ${activeStudent.paid ? 'Unpaid' : 'Paid'}
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    <div class="app-card p-4">
+                        <p class="text-[10px] font-bold opacity-40 uppercase mb-4 text-center">Skill DNA</p>
+                        <canvas id="skillRadar" height="250"></canvas>
+                    </div>
+
+                    <div class="app-card p-4">
+                        <p class="text-[10px] font-bold opacity-40 uppercase mb-4">Award Performance Badges</p>
+                        <div class="flex gap-4 justify-around">
+                            <div class="badge-icon bg-yellow-500/20 text-yellow-500 border border-yellow-500/30">🔥</div>
+                            <div class="badge-icon bg-blue-500/20 text-blue-500 border border-blue-500/30">🎾</div>
+                            <div class="badge-icon bg-green-500/20 text-green-500 border border-green-500/30">🛡️</div>
+                            <div class="badge-icon bg-purple-500/20 text-purple-500 border border-purple-500/30">🧠</div>
+                        </div>
+                    </div>
+
+                    <button onclick="sendWA()" class="w-full bg-[#25D366] text-white font-black py-4 rounded-2xl uppercase text-xs">
+                        Open WhatsApp Analysis
+                    </button>
+                </div>
+            `;
+            
+            sheet.classList.add('sheet-active');
+            initRadar();
+        }
+
+        function initRadar() {
+            const ctx = document.getElementById('skillRadar');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Technique', 'Tactics', 'Power', 'Agility', 'Focus'],
+                    datasets: [{
+                        label: 'Current Skill Level',
+                        data: [65, 59, 80, 81, 56],
+                        fill: true,
+                        backgroundColor: 'rgba(34, 211, 238, 0.2)',
+                        borderColor: '#22d3ee',
+                        pointBackgroundColor: '#22d3ee',
+                    }]
+                },
+                options: {
+                    scales: { r: { grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false }, pointLabels: { color: 'rgba(255,255,255,0.5)', font: { size: 10 } } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function closeSheet() { document.getElementById('studentSheet').classList.remove('sheet-active'); }
+        
+        function updateStats() {
+            const rev = students.filter(s => s.paid).reduce((a,b) => a + b.price, 0);
+            const pend = students.filter(s => !s.paid).reduce((a,b) => a + b.price, 0);
+            document.getElementById('stat-rev').innerText = `R ${rev.toFixed(2)}`;
+            document.getElementById('stat-pending').innerText = `R ${pend.toFixed(2)}`;
         }
 
         function togglePaid(id) {
             const s = students.find(x => x.id === id);
             s.paid = !s.paid;
-            saveToDisk();
+            localStorage.setItem('pp_students', JSON.stringify(students));
+            renderRoster();
+            closeSheet();
         }
 
-        function sendWhatsApp(phone, msg) {
-            const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        function sendWA() {
+            const url = `https://wa.me/${activeStudent.phone}?text=Hi ${activeStudent.name}, here is your latest PadelPilot analysis...`;
             window.open(url, '_blank');
         }
 
-        // --- CALENDAR NOTES ---
-        function saveNote() {
-            const date = document.getElementById('calDate').value;
-            if(!date) return alert("Select a date!");
-            diary[date] = document.getElementById('calNote').value;
-            saveToDisk();
-            document.getElementById('noteStatus').innerText = "Note saved for " + date;
-        }
-
-        function loadNote() {
-            const date = document.getElementById('calDate').value;
-            document.getElementById('calNote').value = diary[date] || "";
-            document.getElementById('noteStatus').innerText = "";
-        }
-
-        // --- UI RENDERING ---
-        function renderStudents() {
-            const list = document.getElementById('studentList');
-            const bill = document.getElementById('billingTable');
-            list.innerHTML = '';
-            bill.innerHTML = '';
-
-            students.forEach(s => {
-                // Roster View
-                list.insertAdjacentHTML('beforeend', `
-                    <div class="bg-black/40 p-3 rounded-xl flex justify-between items-center border border-white/5">
-                        <div>
-                            <p class="font-bold text-xs uppercase">${s.name}</p>
-                            <p class="text-[9px] text-cyan-400 font-bold uppercase">${s.group || 'Individual'}</p>
-                        </div>
-                        <div class="flex gap-2">
-                            <button onclick="sendWhatsApp('${s.phone}', 'Hi ${s.name}, just a reminder for our Padel session!')" class="text-lg">💬</button>
-                            <button onclick="removeStudent(${s.id})" class="text-red-500 opacity-50 hover:opacity-100">✕</button>
-                        </div>
-                    </div>
-                `);
-
-                // Billing View
-                bill.insertAdjacentHTML('beforeend', `
-                    <tr class="border-b border-white/5">
-                        <td class="p-4 font-bold uppercase">${s.name}</td>
-                        <td class="p-4 text-gray-500 uppercase text-[10px]">${s.group}</td>
-                        <td class="p-4">
-                            <span class="px-2 py-1 rounded-full text-[9px] font-bold ${s.paid ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
-                                ${s.paid ? 'PAID' : 'PENDING'}
-                            </span>
-                        </td>
-                        <td class="p-4 font-mono">R ${s.price.toFixed(2)}</td>
-                        <td class="p-4 text-right">
-                            <button onclick="togglePaid(${s.id})" class="bg-white/5 px-3 py-1 rounded text-[9px] font-bold uppercase mr-2">Toggle</button>
-                            <button onclick="sendWhatsApp('${s.phone}', 'Hi ${s.name}, bill for session: R${s.price}. Please confirm payment.')" class="text-cyan-400 font-bold uppercase text-[9px]">Bill Link</button>
-                        </td>
-                    </tr>
-                `);
-            });
-        }
-
-        function updateAccounting() {
-            const totalRev = students.filter(s => s.paid).reduce((sum, s) => sum + s.price, 0);
-            const pending = students.filter(s => !s.paid).reduce((sum, s) => sum + s.price, 0);
-            document.getElementById('acc-total-rev').innerText = `R ${totalRev.toFixed(2)}`;
-            document.getElementById('acc-pending').innerText = `R ${pending.toFixed(2)}`;
-            document.getElementById('acc-student-count').innerText = students.length;
-        }
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active-tab'));
-            document.getElementById('view-' + tabId).classList.add('active-tab');
-        }
-
         // Initialize
-        renderStudents();
-        updateAccounting();
-        document.getElementById('calDate').valueAsDate = new Date();
-        loadNote();
+        if(students.length === 0) {
+            // Add a mock student for demo
+            students = [{ id: 1, name: "Marcus Padel", group: "Elite Squad", phone: "2771234567", price: 450, paid: false }];
+            localStorage.setItem('pp_students', JSON.stringify(students));
+        }
+        renderRoster();
     </script>
 </body>
 </html>

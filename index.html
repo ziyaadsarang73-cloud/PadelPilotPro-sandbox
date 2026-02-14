@@ -86,15 +86,176 @@
 
     <main id="view-container" class="pb-32">
 
-        <section id="view-trainer" class="view-section active px-6">
+        <section id="view-trainer" class="view-section px-6">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">The Roster</h2>
                 <button class="bg-slate-100 p-2 rounded-full">⚙️</button>
             </div>
-
-            <div id="roster-container" class="space-y-4">
-                </div>
+            <div id="roster-container" class="space-y-4"></div>
         </section>
 
         <section id="view-student" class="view-section px-6">
-            <div class="bg
+            <div class="bg-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden mb-6 shadow-xl">
+                <p class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-2">Growth Level</p>
+                <h3 class="text-4xl font-black italic mb-6 uppercase text-[var(--padel-neon)]">Elite Junior</h3>
+                <div class="flex gap-2">
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">🥇</div>
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center opacity-30">👟</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-landing" class="view-section active animate-in fade-in duration-700">
+            <div class="px-8 pt-4 pb-16 text-center bg-white rounded-b-[4rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.05)]">
+                <div class="inline-block px-4 py-1.5 mb-8 text-[10px] font-black tracking-[0.3em] text-blue-600 uppercase bg-blue-50 rounded-full">
+                    Elite Junior Academy
+                </div>
+                
+                <h1 class="text-5xl font-extrabold text-slate-900 leading-[0.9] tracking-tighter mb-8 italic">
+                    PLAY <br/> <span class="text-blue-600">SMART.</span>
+                </h1>
+                
+                <p class="text-slate-400 text-sm leading-relaxed mb-12 max-w-[280px] mx-auto font-medium">
+                    Professional coaching for kids, driven by the <span class="text-slate-900 font-bold">Pro-Path</span> data system.
+                </p>
+                
+                <button onclick="switchView('trainer')" class="w-full bg-slate-900 text-white py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-xs shadow-2xl shadow-blue-200 transition-transform active:scale-95">
+                    Book 15min Baseline
+                </button>
+            </div>
+
+            <div class="px-8 py-10 bg-slate-50 rounded-[3rem] mx-4 my-8 flex flex-col items-center text-center border border-slate-100">
+                <div class="w-20 h-20 mb-4 drop-shadow-xl">
+                    <img src="60117.jpg" alt="Racky Mascot" class="w-full h-full object-contain">
+                </div>
+                <h4 class="text-xl font-black italic tracking-tighter uppercase">Meet <span class="text-blue-600">Racky</span></h4>
+                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2 px-4 leading-relaxed">
+                    I'm your child's digital co-pilot. I track growth and award medals in real-time.
+                </p>
+            </div>
+
+            <div id="inquiry-section" class="px-8 pb-12">
+                <h3 class="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4 ml-4">Inquiry Form</h3>
+                <div class="space-y-3 bg-white p-3 rounded-[3rem] shadow-sm border border-slate-100">
+                    <input type="text" id="parent-name" placeholder="Parent Name" class="w-full p-6 rounded-[2.5rem] bg-slate-50 border-none text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-100">
+                    <input type="text" id="child-name" placeholder="Child's Name" class="w-full p-6 rounded-[2.5rem] bg-slate-50 border-none text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-100">
+                    <input type="tel" id="parent-phone" placeholder="WhatsApp Number" class="w-full p-6 rounded-[2.5rem] bg-slate-50 border-none text-sm font-semibold outline-none focus:ring-2 focus:ring-blue-100">
+                    <button onclick="processInquiry()" class="w-full bg-[var(--padel-blue)] text-white py-6 rounded-[2.5rem] font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-100 flex items-center justify-center gap-3 active:scale-95 transition-transform">
+                        Confirm 15min Trial 🎾
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav fixed flex justify-around items-center py-5 z-40" style="display: none;">
+        <button onclick="switchView('landing')" class="p-2">🏠</button>
+        <button onclick="switchView('trainer')" class="p-2">📋</button>
+        <button onclick="switchView('student')" class="p-2">📈</button>
+    </nav>
+
+<script>
+    // 1. DATA: This is your 'database' for now
+    let students = [
+        { name: "Bruno", level: "Intermediate", icon: "🧒", parent: "Ziyaad" },
+        { name: "Alex", level: "Beginner", icon: "👦", parent: "Ziyaad" }
+    ];
+
+    // 2. VIEW MANAGER: Handles switching pages
+    function switchView(viewId) {
+        // Hide all views
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        
+        // Show the one we want
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        
+        // Hide the bottom nav if we are on the Landing Page
+        const nav = document.querySelector('.bottom-nav');
+        if (nav) nav.style.display = (viewId === 'landing') ? 'none' : 'flex';
+
+        // Auto-scroll to top
+        window.scrollTo(0,0);
+
+        // Racky reacts to the page change
+        const msgs = {
+            landing: "Welcome to PadelPilotPro! Ready to start?",
+            trainer: "Roster updated. Who are we assessing today?",
+            student: "Pro-Path active! Check out those medals."
+        };
+        rackyTalk(msgs[viewId]);
+    }
+    // 3. PROCESS INQUIRY: Carries data from Landing to Trainer
+    function processInquiry() {
+        const parent = document.getElementById('parent-name').value;
+        const child = document.getElementById('child-name').value;
+        const phone = document.getElementById('parent-phone').value;
+
+        if(!child || !parent || !phone) {
+            rackyTalk("I need all details to start the Pro-Path!");
+            return;
+        }
+
+        // Add to our list
+        students.unshift({
+            name: child,
+            level: "NEW INQUIRY",
+            parent: parent,
+            phone: phone,
+            icon: "🆕"
+        });
+
+        rackyTalk(`Awesome! I've added ${child} to the roster.`);
+
+        // Update the visual list and switch views
+        renderRoster();
+        setTimeout(() => switchView('trainer'), 1500);
+    }
+
+    // 4. RENDER ROSTER: Creates the student cards
+    function renderRoster() {
+        const container = document.getElementById('roster-container');
+        if (!container) return;
+        
+        container.innerHTML = students.map(s => `
+            <div class="student-card bg-white p-6 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.08)] flex items-center justify-between mb-4">
+                <div class="flex items-center gap-5">
+                    <div class="w-14 h-14 bg-slate-50 rounded-[1.5rem] flex items-center justify-center text-2xl">${s.icon}</div>
+                    <div>
+                        <h4 class="font-black text-lg tracking-tight">${s.name}</h4>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${s.level}</p>
+                    </div>
+                </div>
+                <button class="w-12 h-12 bg-[var(--padel-blue)] text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                </button>
+            </div>
+        `).join('');
+    }
+    // 5. RACKY SPEECH: Controls the chat bubble
+    function rackyTalk(msg = "Ready to play smart?") {
+        const bubble = document.getElementById('racky-speech');
+        const txt = document.getElementById('racky-msg');
+        if (!bubble || !txt) return;
+
+        txt.innerText = msg;
+        bubble.style.opacity = "1";
+        bubble.style.pointerEvents = "auto";
+
+        // Hide bubble after 4 seconds
+        setTimeout(() => {
+            bubble.style.opacity = "0";
+            bubble.style.pointerEvents = "none";
+        }, 4000);
+    }
+
+    // Initialize the app
+    window.onload = () => {
+        renderRoster();
+        rackyTalk("PadelPilotPro is online! 👋");
+    };
+</script>
+</body>
+</html>
+
+

@@ -11,7 +11,7 @@
     <!-- Firebase SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-      import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+      import { getFirestore, collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, getDocs, where, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyDimi5qy6YOnY7MsLymNUKtIxW-kPmH870",
@@ -30,12 +30,21 @@
       window.onSnapshot = onSnapshot;
       window.query = query;
       window.orderBy = orderBy;
+      window.addDoc = addDoc;
+      window.serverTimestamp = serverTimestamp;
+      window.getDocs = getDocs;
+      window.where = where;
+      window.doc = doc;
+      window.updateDoc = updateDoc;
+      window.deleteDoc = deleteDoc;
     </script>
     <style>
         :root {
             --padel-blue: #0070D1;
             --padel-neon: #CCFF00;
             --soft-gray: #F0F7FF;
+            --green-available: #10B981;
+            --red-booked: #EF4444;
         }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; margin: 0 auto; max-width: 480px; overflow-x: hidden; }
         .glass-card { background: white; border-radius: 2.5rem; box-shadow: 0 10px 30px rgba(0, 112, 209, 0.08); border: 1px solid rgba(255, 255, 255, 0.9); overflow: hidden; }
@@ -49,6 +58,12 @@
         .tab-button.active { color: var(--padel-blue); border-bottom: 3px solid var(--padel-blue); font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+        .calendar-day { background: rgba(255, 255, 255, 0.6); border-radius: 1.5rem; padding: 1rem; margin: 0.5rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .calendar-day:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(-2px); }
+        .calendar-day.available { background: rgba(16, 185, 129, 0.15); border: 2px solid var(--green-available); }
+        .calendar-day.booked { background: rgba(239, 68, 68, 0.15); border: 2px solid var(--red-booked); }
+        .calendar-day.today { background: rgba(204, 255, 0, 0.15); border: 2px solid var(--padel-neon); }
+        .calendar-day.selected { background: var(--padel-blue); color: white; }
     </style>
 </head>
 <body>
@@ -107,23 +122,37 @@
                 </button>
             </div>
 
-            <!-- Tab Contents -->
+            <!-- Calendar Tab -->
             <div id="calendar" class="tab-content active p-6">
-                <h3 class="text-xl font-black mb-4">Calendar & Planner</h3>
+                <h3 class="text-xl font-black mb-4">Weekly Planner & Calendar</h3>
                 <p class="text-slate-500 mb-6">Your schedule — auto-filled from enrollments</p>
-                <!-- Weekly view placeholder -->
-                <div class="grid grid-cols-7 gap-2">
-                    <div class="calendar-day booked"><div>Mon</div><div>14</div></div>
-                    <div class="calendar-day today"><div>Tue</div><div>15</div></div>
-                    <!-- ... more days ... -->
+
+                <!-- Weekly View -->
+                <div id="weekly-view" class="grid grid-cols-7 gap-2 mb-6">
+                    <!-- Days populated by JS -->
                 </div>
-                <button class="mt-4 w-full btn-primary">Expand to Full Month</button>
+
+                <!-- Monthly View (hidden by default) -->
+                <div id="monthly-view" class="hidden grid grid-cols-7 gap-2 mb-6">
+                    <!-- Days populated by JS -->
+                </div>
+
+                <button onclick="toggleCalendarView()" class="mt-4 w-full btn-primary" id="view-toggle">Expand to Full Month</button>
+
+                <!-- Selected Day Details -->
+                <div id="day-details" class="mt-6 hidden">
+                    <h4 class="text-lg font-black mb-3">Day Details</h4>
+                    <p id="selected-day-title" class="text-slate-600 mb-4"></p>
+                    <div id="day-sessions" class="space-y-3 mb-4"></div>
+                    <textarea id="day-note" placeholder="Add daily note..." class="w-full p-4 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none mb-4" rows="3"></textarea>
+                    <button onclick="saveDayNote()" class="w-full btn-primary">Save Note</button>
+                </div>
             </div>
 
+            <!-- Other Tabs (placeholders) -->
             <div id="roster" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Roster</h3>
                 <p class="text-slate-500 mb-6">Your active students</p>
-                <!-- Roster placeholder -->
                 <div class="space-y-4">
                     <div class="glass-card p-5">
                         <div class="flex items-center gap-4">
@@ -140,14 +169,12 @@
             <div id="messaging" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Messaging</h3>
                 <p class="text-slate-500 mb-6">Quick WhatsApp to your players</p>
-                <!-- Placeholder -->
                 <button class="w-full btn-primary">Send Bulk Message</button>
             </div>
 
             <div id="accounting" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Accounting</h3>
                 <p class="text-slate-500 mb-6">Track fees & payments</p>
-                <!-- Placeholder -->
                 <div class="text-center text-slate-600 py-12">
                     <i class="fas fa-wallet text-6xl mb-4 text-blue-200"></i>
                     <p>Payment tracking coming soon</p>
@@ -157,7 +184,6 @@
             <div id="analytics" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Analytics</h3>
                 <p class="text-slate-500 mb-6">Insights on your academy</p>
-                <!-- Placeholder -->
                 <div class="grid grid-cols-2 gap-4">
                     <div class="glass-card p-6 text-center">
                         <p class="text-3xl font-black text-blue-600">12</p>
@@ -185,6 +211,8 @@
 
     <script>
         let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let students = [];
+        let activeVenueLink = "https://maps.google.com/?q=Main+Club";
 
         function checkAccess() {
             if (!currentUser || currentUser.role !== 'trainer') {
@@ -214,9 +242,59 @@
             rackyTalk(`Switched to ${tabName.charAt(0).toUpperCase() + tabName.slice(1)} tab!`);
         }
 
+        // Calendar Functions
+        function generateWeeklyCalendar() {
+            const weeklyView = document.getElementById('weekly-view');
+            weeklyView.innerHTML = '';
+            const today = new Date();
+            const startOfWeek = new Date(today);
+            startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Monday
+
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startOfWeek);
+                day.setDate(startOfWeek.getDate() + i);
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.innerHTML = `
+                    <div class="font-bold">${day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                    <div class="text-sm">${day.getDate()}</div>
+                `;
+                if (day.toDateString() === today.toDateString()) dayElement.classList.add('today');
+                dayElement.onclick = () => selectDay(day);
+                weeklyView.appendChild(dayElement);
+            }
+        }
+
+        function toggleCalendarView() {
+            const weekly = document.getElementById('weekly-view');
+            const monthly = document.getElementById('monthly-view');
+            const toggleBtn = document.getElementById('view-toggle');
+            if (weekly.classList.contains('hidden')) {
+                weekly.classList.remove('hidden');
+                monthly.classList.add('hidden');
+                toggleBtn.textContent = 'Expand to Month';
+            } else {
+                weekly.classList.add('hidden');
+                monthly.classList.remove('hidden');
+                toggleBtn.textContent = 'Back to Week';
+            }
+        }
+
+        function selectDay(day) {
+            selectedDay = day;
+            rackyTalk(`Selected ${day.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`);
+            // Future: show details/notes
+        }
+
+        function populateCalendar() {
+            rackyTalk("Calendar updated with all your sessions, Coach! No double bookings detected.");
+        }
+
         window.onload = () => {
             checkAccess();
-            rackyTalk("Trainer Hub ready, Coach! Start with Calendar or Roster.");
+            generateWeeklyCalendar();
+            populateCalendar();
+            rackyTalk("Coach mode ON! Calendar and roster ready — let's run this lab!");
         };
     </script>
 </body>

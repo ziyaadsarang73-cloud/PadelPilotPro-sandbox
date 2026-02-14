@@ -3,124 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PadelPilot | Racky AI</title>
+    <title>PadelPilotPro | Performance Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root {
+            --padel-blue: #005BB7;
+            --padel-neon: #CCFF00;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FFFFFF; color: #1e293b; }
+        
+        /* The Performance Banner */
+        .header-banner {
+            background-color: var(--padel-blue);
+            border-bottom: 6px solid var(--padel-neon);
+            border-radius: 0 0 3rem 3rem;
+            position: relative;
+            overflow: visible; /* Allows Racky to "break the box" */
+        }
+
+        /* Neon Speed Slash */
+        .speed-slash {
+            position: absolute;
+            right: 20%;
+            top: -10%;
+            width: 40px;
+            height: 120%;
+            background: var(--padel-neon);
+            transform: rotate(25deg);
+            opacity: 0.2;
+            filter: blur(20px);
+        }
+
+        /* Student Card Aesthetics */
+        .student-card {
+            border-left: 4px solid var(--padel-neon);
+            border-radius: 2.5rem;
+            transition: transform 0.2s ease;
+        }
+        .student-card:active { transform: scale(0.98); }
+
         .view-section { display: none; }
         .view-section.active { display: block; }
-        .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); }
-        /* Racky Animation */
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        .racky-float { animation: float 3s ease-in-out infinite; }
+
+        /* Floating Nav */
+        .bottom-nav {
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900">
+<body>
 
-    <div id="racky-bubble" class="fixed bottom-24 right-6 z-50 pointer-events-none">
-        <div class="bg-slate-900 text-white p-4 rounded-2xl rounded-br-none shadow-2xl mb-2 opacity-0 transition-opacity duration-500 text-[11px] max-w-[150px]" id="racky-text">
-            "Good morning! Ready to assess some future pros?"
-        </div>
-        <div class="racky-float pointer-events-auto cursor-pointer flex justify-end" onclick="rackySpeak()">
-            <div class="bg-blue-600 w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl border-2 border-white">
-                <span class="text-2xl">🤖</span>
+    <header class="header-banner pt-16 pb-12 px-8 mb-8 shadow-2xl shadow-blue-100">
+        <div class="speed-slash"></div>
+        
+        <div class="flex justify-between items-center relative z-10">
+            <div>
+                <h1 class="text-white text-3xl font-black italic tracking-tighter leading-none">
+                    PADELPILOT<span class="text-[var(--padel-neon)]">PRO</span>
+                </h1>
+                <p class="text-blue-200 text-[10px] font-bold uppercase tracking-[0.3em] mt-2">
+                    Play Smart Academy
+                </p>
+            </div>
+
+            <div class="absolute -top-10 -right-4 w-28 h-28 cursor-pointer" onclick="rackyTalk()">
+                <img src="60117.jpg" alt="Racky" class="w-full h-full object-contain drop-shadow-2xl">
             </div>
         </div>
-    </div>
 
-    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-50 glass-nav border border-slate-200 rounded-full p-1 flex shadow-sm">
-        <button onclick="showView('landing')" class="px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter hover:bg-white">Public</button>
-        <button onclick="showView('trainer')" class="px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter hover:bg-white">Trainer</button>
-        <button onclick="showView('student')" class="px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter hover:bg-white">Pro-Path</button>
-    </div>
+        <div id="racky-speech" class="absolute -bottom-16 right-8 bg-white p-4 rounded-2xl rounded-tr-none shadow-xl border border-slate-100 opacity-0 transition-all duration-300 pointer-events-none z-50">
+            <p id="racky-msg" class="text-[11px] font-bold text-slate-800 leading-tight"></p>
+        </div>
+    </header>
 
-    <div id="app-shell" class="min-h-screen pb-20">
+    <main id="view-container" class="pb-32">
 
-        <section id="view-landing" class="view-section active animate-in fade-in duration-500">
-            <div class="px-8 pt-24 pb-12 text-center bg-white rounded-b-[3rem] shadow-sm">
-                <div class="w-16 h-16 bg-blue-600 rounded-2xl mx-auto mb-6 flex items-center justify-center text-white font-black italic">PP</div>
-                <h1 class="text-4xl font-black tracking-tight text-slate-900 mb-4">Play Smart <br><span class="text-blue-600 italic">Padel.</span></h1>
-                <p class="text-slate-400 text-sm mb-10 leading-relaxed">The premier data-driven coaching experience for junior players.</p>
-                <button onclick="showView('trainer')" class="w-full bg-slate-900 text-white py-5 rounded-3xl font-black uppercase text-xs tracking-widest shadow-xl shadow-slate-200">Book Assessment</button>
+        <section id="view-trainer" class="view-section active px-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">The Roster</h2>
+                <button class="bg-slate-100 p-2 rounded-full">⚙️</button>
             </div>
-            <div class="p-8">
-                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Our Programs</h3>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 mb-4 flex justify-between items-center">
-                    <div>
-                        <h4 class="font-bold text-sm">Private Coaching</h4>
-                        <p class="text-[10px] text-slate-400 italic">Individual focus</p>
-                    </div>
-                    <span class="font-black text-blue-600">R 450</span>
+
+            <div id="roster-container" class="space-y-4">
                 </div>
-            </div>
         </section>
 
-        <section id="view-trainer" class="view-section p-6 pt-20">
-            <header class="flex justify-between items-center mb-8">
-                <div>
-                    <h2 class="text-2xl font-black italic tracking-tighter uppercase">Trainer <span class="text-blue-600">Hub</span></h2>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Managing: Bruno & Alex</p>
-                </div>
-                <div class="w-10 h-10 bg-slate-200 rounded-full border-2 border-white"></div>
-            </header>
-
-            <div class="grid grid-cols-2 gap-3 mb-8">
-                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm">
-                    <p class="text-[8px] font-black text-slate-400 uppercase">Revenue (Feb)</p>
-                    <p class="text-lg font-black tracking-tight text-slate-800">R 12,400</p>
-                </div>
-                <div class="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm text-center flex items-center justify-center text-blue-600 font-bold text-xs uppercase cursor-pointer">
-                    + Add Student
-                </div>
-            </div>
-
-            <div class="space-y-3">
-                <div class="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex justify-between items-center">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-xl">🧒</div>
-                        <div>
-                            <h4 class="font-bold text-sm">Bruno</h4>
-                            <p class="text-[9px] font-bold text-blue-600 uppercase">Beginner+</p>
-                        </div>
-                    </div>
-                    <button class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[9px] font-black uppercase">Assess</button>
-                </div>
-            </div>
-        </section>
-
-        <section id="view-student" class="view-section p-6 pt-20">
-            <header class="text-center mb-8">
-                <h2 class="text-2xl font-black italic tracking-tighter uppercase">Pro-<span class="text-blue-600">Path</span></h2>
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Bruno's Journey</p>
-            </header>
-
-            <div class="bg-blue-600 p-8 rounded-[3rem] text-white shadow-2xl shadow-blue-200 mb-6 relative overflow-hidden">
-                <div class="relative z-10">
-                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-1">Growth Status</p>
-                    <h3 class="text-4xl font-black mb-4 tracking-tighter italic text-white">Elite Junior</h3>
-                    <div class="w-full bg-blue-400/30 h-2 rounded-full overflow-hidden">
-                        <div class="bg-white h-full w-[65%]"></div>
-                    </div>
-                </div>
-                <span class="absolute -bottom-4 -right-4 text-8xl opacity-10">🎾</span>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h5 class="text-[9px] font-black text-slate-400 uppercase mb-4">Medals</h5>
-                    <div class="flex gap-2">
-                        <span class="w-8 h-8 bg-yellow-50 rounded-lg flex items-center justify-center">🥇</span>
-                        <span class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">👟</span>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
-                    <h5 class="text-[9px] font-black text-slate-400 uppercase mb-2">Next Session</h5>
-                    <p class="text-xs font-bold">Tue, 14:00</p>
-                </div>
-            </div>
-        </section>
-
-    </div>
-
-    <nav class="fixed bottom-0 left-0 right-0 glass
+        <section id="view-student" class="view-section px-6">
+            <div class="bg

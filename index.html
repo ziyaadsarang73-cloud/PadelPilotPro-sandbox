@@ -12,22 +12,70 @@
             --padel-neon: #CCFF00;
             --soft-gray: #F0F7FF;
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; margin: 0 auto; max-width: 480px; overflow-x: hidden; }
-        .glass-card { background: white; border-radius: 2.5rem; box-shadow: 0 20px 50px -10px rgba(0, 112, 209, 0.1); border: 1px solid rgba(255, 255, 255, 0.8); }
-        .btn-primary { background: var(--padel-blue); color: white; padding: 1.25rem; border-radius: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 10px 25px -5px rgba(0, 112, 209, 0.3); }
-        .btn-primary:active { transform: scale(0.96); }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
-        .floating-racky { animation: float 3s ease-in-out infinite; }
-        #login-toolbar { background: rgba(0, 112, 209, 0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 12px 24px; margin: 0 -24px 24px -24px; }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--soft-gray); 
+            color: #1e293b; 
+            margin: 0 auto; 
+            max-width: 480px; 
+            overflow-x: hidden; 
+            min-height: 100vh;
+        }
+        .glass-card { 
+            background: white; 
+            border-radius: 2.5rem; 
+            box-shadow: 0 10px 30px rgba(0, 112, 209, 0.08); /* softer shadow */
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            overflow: hidden;
+        }
+        .btn-primary { 
+            background: var(--padel-blue); 
+            color: white; 
+            padding: 1.25rem; 
+            border-radius: 2rem; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.05em; 
+            transition: all 0.3s ease; 
+            box-shadow: 0 8px 20px rgba(0, 112, 209, 0.25);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0, 112, 209, 0.35); }
+        .btn-primary:active { transform: scale(0.97); }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+        .floating-racky { animation: float 5s ease-in-out infinite; transform-origin: bottom center; }
+        #login-toolbar {
+            background: rgba(0, 112, 209, 0.94);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 12px 24px;
+            margin: 0;
+        }
         #login-toolbar .container { display: flex; justify-content: flex-end; }
-        #login-toolbar .login-btn { padding: 10px 28px; font-size: 1rem; font-weight: 800; background: white; color: var(--padel-blue); border: 2px solid white; border-radius: 9999px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: all 0.2s; }
-        #login-toolbar .login-btn:hover { background: #f0f9ff; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
-        @media (max-width: 640px) { #login-toolbar { padding: 10px 16px; margin: 0 -16px 16px -16px; } #login-toolbar .login-btn { padding: 9px 24px; font-size: 0.95rem; } }
+        #login-toolbar .login-btn {
+            padding: 10px 32px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background: white;
+            color: var(--padel-blue);
+            border: 2px solid var(--padel-blue);
+            border-radius: 9999px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        #login-toolbar .login-btn:hover { background: #e6f3ff; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        @media (max-width: 640px) {
+            #login-toolbar { padding: 10px 16px; }
+            #login-toolbar .login-btn { padding: 9px 28px; font-size: 1rem; }
+        }
+        header { overflow: hidden; margin: 0; padding-top: 2.5rem; }
+        main { padding-top: 80px; } /* Space for toolbar */
     </style>
 </head>
 <body>
 
-    <header class="bg-[#0070D1] pt-10 pb-16 px-8 mb-[-2rem] rounded-b-3xl relative overflow-hidden">
+    <header class="bg-[#0070D1] pt-10 pb-16 px-8 rounded-b-3xl relative overflow-hidden">
         <div class="flex justify-between items-start relative z-10">
             <div>
                 <p class="text-white italic font-bold text-lg mb-1">speed</p>
@@ -53,15 +101,15 @@
     </div>
 
     <main class="pb-32 px-6">
-        <div class="glass-card p-10 mb-6">
+        <div class="glass-card p-10 mb-8">
             <div class="inline-block px-4 py-1.5 mb-6 text-[10px] font-black tracking-widest text-white uppercase bg-[#0070D1] rounded-full">Elite Training</div>
-            <h1 class="text-6xl font-extrabold text-[#1A1A1A] leading-[0.85] tracking-tighter mb-8 italic">MASTER <br/> <span class="text-[#0070D1]">THE COURT.</span></h1>
+            <h1 class="text-5xl md:text-6xl font-extrabold text-[#1A1A1A] leading-tight tracking-tighter mb-8 italic">MASTER <br/> <span class="text-[#0070D1]">THE COURT.</span></h1>
             <p class="text-slate-500 text-sm leading-relaxed mb-10 font-medium">Professional coaching for all levels, driven by the <span class="text-slate-900 font-bold">Pro-Path</span> data system.</p>
         </div>
 
         <div class="px-2 pb-12">
             <h3 class="text-xl font-black text-slate-900 mb-6 ml-2">Pilot Enrollment</h3>
-            <div class="space-y-4">
+            <div class="space-y-5">
                 <input type="text" id="parent-name" placeholder="Full Name (Player/Guardian)" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
                 <input type="text" id="child-name" placeholder="Player Name" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
                 <div class="flex gap-4">
@@ -85,27 +133,13 @@
     </main>
 
     <script>
-        function rackyTalk(msg, pitch = 1.25, rate = 1.05) {
+        function rackyTalk(msg = "Ready to pilot?") {
             const bubble = document.getElementById('racky-speech');
             const txt = document.getElementById('racky-msg');
             if (!bubble || !txt) return;
-
             txt.innerText = msg;
             bubble.style.opacity = "1";
-            setTimeout(() => { bubble.style.opacity = "0"; }, 8000);
-
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(msg);
-                utterance.rate = rate;
-                utterance.pitch = pitch;
-                utterance.volume = 0.9;
-
-                const voices = speechSynthesis.getVoices();
-                const friendlyVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Zira')) || voices[0];
-                if (friendlyVoice) utterance.voice = friendlyVoice;
-
-                speechSynthesis.speak(utterance);
-            }
+            setTimeout(() => { bubble.style.opacity = "0"; }, 6000);
         }
 
         function processInquiry() {
@@ -117,15 +151,15 @@
             const time = document.getElementById('session-time').value;
 
             if (!child || !parent || !phone || !age || !skill || !time) {
-                rackyTalk("Hey! I need all the details to get started! 🕒", 1.3, 1.1);
+                rackyTalk("I need all data points to begin the assessment! 🕒");
                 return;
             }
 
-            rackyTalk(`Awesome! ${child} is now in the system for ${time}. Let's crush it! 💪`, 1.2, 1.1);
+            rackyTalk(`System updated. ${child} is scheduled for ${time}.`);
         }
 
         window.onload = () => {
-            rackyTalk("Hey there! I'm Racky, your padel wingman! Welcome to PadelPilotPro Performance Lab. Ready to level up your game? Fill that form and let's get started! 🎾", 1.3, 1.1);
+            rackyTalk("PadelPilotPro Online. 👋");
         };
     </script>
 </body>

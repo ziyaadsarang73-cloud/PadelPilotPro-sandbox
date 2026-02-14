@@ -49,12 +49,9 @@
         .tab-button.active { color: var(--padel-blue); border-bottom: 3px solid var(--padel-blue); font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .calendar-day { background: rgba(255, 255, 255, 0.6); border-radius: 1.5rem; padding: 1rem; margin: 0.5rem; cursor: pointer; transition: all 0.2s; text-align: center; }
-        .calendar-day:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(-2px); }
-        .calendar-day.booked { background: rgba(0, 112, 209, 0.1); border: 2px solid var(--padel-blue); }
-        .calendar-day.today { background: rgba(204, 255, 0, 0.15); border: 2px solid var(--padel-neon); }
-        .analytics-btn { padding: 6px 12px; font-size: 0.85rem; background: var(--padel-blue); color: white; border-radius: 9999px; margin-top: 6px; display: block; width: fit-content; margin-left: auto; margin-right: auto; }
-        .analytics-btn:hover { background: #0059a8; }
+        .student-card { background: white; border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid var(--padel-blue); text-align: center; }
+        .analytics-btn { padding: 8px 16px; font-size: 0.9rem; background: var(--padel-blue); color: white; border-radius: 9999px; margin-top: 8px; display: inline-block; transition: all 0.2s; }
+        .analytics-btn:hover { background: #0059a8; transform: translateY(-1px); }
     </style>
 </head>
 <body>
@@ -113,35 +110,8 @@
                 </button>
             </div>
 
-            <!-- Calendar Tab -->
-            <div id="calendar" class="tab-content active p-6">
-                <h3 class="text-xl font-black mb-4">Weekly Planner & Calendar</h3>
-                <p class="text-slate-500 mb-6">Your schedule — auto-filled from enrollments</p>
-
-                <!-- Weekly View -->
-                <div id="weekly-view" class="grid grid-cols-7 gap-2 mb-6">
-                    <!-- Days populated by JS -->
-                </div>
-
-                <!-- Monthly View (hidden by default) -->
-                <div id="monthly-view" class="hidden grid grid-cols-7 gap-2 mb-6">
-                    <!-- Days populated by JS -->
-                </div>
-
-                <button onclick="toggleCalendarView()" class="mt-4 w-full btn-primary" id="view-toggle">Expand to Full Month</button>
-
-                <!-- Selected Day Details -->
-                <div id="day-details" class="mt-6 hidden">
-                    <h4 class="text-lg font-black mb-3">Day Details</h4>
-                    <p id="selected-day-title" class="text-slate-600 mb-4"></p>
-                    <div id="day-sessions" class="space-y-3 mb-4"></div>
-                    <textarea id="day-note" placeholder="Add daily note..." class="w-full p-4 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none mb-4" rows="3"></textarea>
-                    <button onclick="saveDayNote()" class="w-full btn-primary">Save Note</button>
-                </div>
-            </div>
-
-            <!-- Roster Tab (simplified cards) -->
-            <div id="roster" class="tab-content p-6 hidden">
+            <!-- Roster Tab -->
+            <div id="roster" class="tab-content p-6 active">
                 <h3 class="text-xl font-black mb-4">Roster</h3>
                 <p class="text-slate-500 mb-6">Your active students</p>
                 <input type="text" id="roster-search" placeholder="Search students by name..." class="w-full p-4 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none mb-6">
@@ -153,14 +123,25 @@
                 </div>
             </div>
 
-            <!-- Messaging Tab -->
+            <!-- Calendar Tab (placeholder) -->
+            <div id="calendar" class="tab-content p-6 hidden">
+                <h3 class="text-xl font-black mb-4">Calendar & Planner</h3>
+                <p class="text-slate-500 mb-6">Your schedule — auto-filled from enrollments</p>
+                <div class="grid grid-cols-7 gap-2 mb-6">
+                    <div class="calendar-day booked"><div>Mon</div><div>14</div></div>
+                    <div class="calendar-day today"><div>Tue</div><div>15</div></div>
+                    <!-- Placeholder days -->
+                </div>
+                <button class="mt-4 w-full btn-primary">Expand to Full Month</button>
+            </div>
+
+            <!-- Other Tabs -->
             <div id="messaging" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Messaging</h3>
                 <p class="text-slate-500 mb-6">Quick WhatsApp to your players</p>
                 <button class="w-full btn-primary">Send Bulk Message</button>
             </div>
 
-            <!-- Accounting Tab -->
             <div id="accounting" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Accounting</h3>
                 <p class="text-slate-500 mb-6">Track fees & payments</p>
@@ -170,7 +151,6 @@
                 </div>
             </div>
 
-            <!-- Analytics Tab -->
             <div id="analytics" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Analytics</h3>
                 <p class="text-slate-500 mb-6">Insights on your academy</p>

@@ -1,63 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... your existing head content, Tailwind, fonts, Firebase SDK ... -->
-    <!-- Keep Firebase config and imports as-is -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PadelPilotPro | Performance Lab</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --padel-blue: #0070D1;
+            --padel-neon: #CCFF00;
+            --soft-gray: #F0F7FF;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; }
+        
+        .glass-card {
+            background: white;
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 50px -10px rgba(0, 112, 209, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .btn-primary {
+            background: var(--padel-blue);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            box-shadow: 0 10px 25px -5px rgba(0, 112, 209, 0.3);
+        }
+        .btn-primary:active { transform: scale(0.96); }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating-racky { animation: float 3s ease-in-out infinite; }
+
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        .bottom-nav {
+            bottom: 20px; left: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Login Toolbar - slim bar under header */
+        #login-toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+            padding: 10px 24px;
+        }
+
+        @media (max-width: 640px) {
+            #login-toolbar {
+                padding: 8px 16px;
+            }
+            #login-toolbar button {
+                padding: 8px 16px;
+                font-size: 0.875rem;
+            }
+        }
+    </style>
 </head>
 <body>
 
     <header class="bg-[#0070D1] pt-12 pb-24 px-8 mb-[-4rem] rounded-b-[4rem] relative overflow-hidden">
-        <!-- Existing header content -->
         <div class="flex justify-between items-start relative z-10">
             <div>
-                <!-- ... title ... -->
+                <p class="text-white italic font-bold text-lg mb-1">speed</p>
+                <h1 class="text-white text-3xl font-black italic tracking-tighter leading-none">
+                    PADELPILOT<span class="text-[var(--padel-neon)]">PRO</span>
+                </h1>
+                <p class="text-blue-100 text-[11px] font-bold mt-1 uppercase tracking-[0.2em]">Performance Lab</p>
             </div>
             <div class="w-24 h-24 mt-[-1rem] cursor-pointer" onclick="rackyTalk()">
                 <img src="60117.jpg" alt="Racky" class="w-full h-full object-contain drop-shadow-2xl floating-racky">
             </div>
         </div>
 
-        <!-- Add Login Button here -->
-        <button onclick="switchView('login')" class="absolute top-6 right-8 bg-white/90 text-[#0070D1] px-6 py-3 rounded-full font-bold shadow-md hover:bg-white transition-all">
-            Login / Hub
-        </button>
-
-        <!-- Racky speech bubble -->
         <div id="racky-speech" class="absolute -bottom-10 right-8 bg-white p-4 rounded-2xl rounded-tr-none shadow-xl opacity-0 transition-all duration-300 pointer-events-none z-50">
             <p id="racky-msg" class="text-[11px] font-bold text-slate-800 leading-tight"></p>
         </div>
     </header>
 
+    <!-- Login Toolbar - placed right under header -->
+    <div id="login-toolbar" class="flex justify-end items-center gap-4">
+        <button onclick="switchView('login')" class="px-6 py-2 bg-white text-[#0070D1] rounded-full font-bold text-sm shadow-md hover:bg-blue-50 transition-all border border-[#0070D1]">
+            Login to Hub
+        </button>
+        <button onclick="switchView('landing')" class="px-6 py-2 bg-[#0070D1] text-white rounded-full font-bold text-sm hover:bg-blue-700 transition-all">
+            Enroll New Player
+        </button>
+    </div>
+
     <main id="view-container" class="pb-32">
 
-        <!-- Login View (hidden by default) -->
-        <section id="view-login" class="view-section px-6 py-12 hidden">
+        <!-- Login View -->
+        <section id="view-login" class="view-section px-6 py-12">
             <div class="glass-card p-10 max-w-md mx-auto">
                 <h2 class="text-3xl font-black text-center mb-8">Sign In</h2>
-                <p class="text-center text-slate-500 mb-8">Trainer Hub or your Pro-Path</p>
+                <p class="text-center text-slate-500 mb-8">Access Trainer Hub or your Pro-Path</p>
                 
                 <div class="space-y-6">
                     <input type="email" id="login-email" placeholder="Email" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
                     <input type="password" id="login-password" placeholder="Password" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
                     <button onclick="loginUser()" class="w-full btn-primary">Sign In</button>
-                    <button onclick="switchView('landing')" class="w-full text-center text-slate-500 mt-4">Back to Enrollment</button>
+                    <button onclick="switchView('landing')" class="w-full text-center text-slate-500 mt-4 underline">Back to Enrollment</button>
                 </div>
             </div>
         </section>
 
-        <!-- Trainer Hub -->
-        <section id="view-trainer" class="view-section px-6 hidden">
-            <!-- Your existing roster + venue selector -->
-            <button onclick="logoutUser()" class="mt-8 w-full bg-red-500 text-white py-4 rounded-2xl font-bold">Logout</button>
+        <section id="view-trainer" class="view-section px-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">The Roster</h2>
+                <select id="trainer-venue" onchange="updateVenue()" class="bg-white px-4 py-2 rounded-xl text-[10px] font-bold border border-slate-100 shadow-sm outline-none">
+                    <option value="https://maps.google.com/?q=Main+Club">Main Club</option>
+                    <option value="https://maps.google.com/?q=Downtown+Arena">Downtown Arena</option>
+                </select>
+            </div>
+            <div id="roster-container" class="space-y-4"></div>
         </section>
 
-        <!-- Student Pro-Path -->
-        <section id="view-student" class="view-section px-6 hidden">
-            <!-- Your existing student card -->
-            <button onclick="logoutUser()" class="mt-8 w-full bg-red-500 text-white py-4 rounded-2xl font-bold">Logout</button>
+        <section id="view-student" class="view-section px-6">
+            <div class="bg-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden mb-6 shadow-xl">
+                <p class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-2">Performance Tier</p>
+                <h3 class="text-4xl font-black italic mb-6 uppercase text-[var(--padel-neon)]">Elite Junior</h3>
+                <div class="flex gap-2">
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">🥇</div>
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center opacity-30">⚡</div>
+                </div>
+            </div>
         </section>
 
-        <!-- Landing + Enrollment (default visible) -->
         <section id="view-landing" class="view-section active p-6">
             <div class="glass-card p-10 mb-6">
                 <div class="inline-block px-4 py-1.5 mb-6 text-[10px] font-black tracking-widest text-white uppercase bg-[#0070D1] rounded-full">Elite Training</div>
@@ -66,7 +153,6 @@
                 <button onclick="switchView('trainer')" class="w-full btn-primary text-sm">Open Trainer Hub</button>
             </div>
 
-            <!-- Pivotal Enrollment Form - fully restored -->
             <div class="px-2 pb-12">
                 <h3 class="text-xl font-black text-slate-900 mb-6 ml-2">Pilot Enrollment</h3>
                 <div class="space-y-4">
@@ -85,7 +171,6 @@
                         <option value="" disabled selected>Preferred Time Slot</option>
                         <option value="Monday 4:00 PM">Monday 4:00 PM</option>
                         <option value="Wednesday 5:00 PM">Wednesday 5:00 PM</option>
-                        <!-- Add more slots as needed -->
                     </select>
                     <input type="tel" id="parent-phone" placeholder="WhatsApp Number" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
                     <button onclick="processInquiry()" class="w-full btn-primary flex items-center justify-center gap-3 mt-4">Confirm Baseline Session 🎾</button>
@@ -94,10 +179,11 @@
         </section>
     </main>
 
-    <nav id="bottom-nav" class="bottom-nav fixed flex justify-around items-center py-5 z-40 hidden">
+    <nav class="bottom-nav fixed flex justify-around items-center py-5 z-40" style="display: none;">
         <button onclick="switchView('landing')" class="p-2">🏠</button>
         <button onclick="switchView('trainer')" class="p-2">📋</button>
         <button onclick="switchView('student')" class="p-2">📈</button>
+        <button onclick="logoutUser()" class="p-2 text-red-600 font-bold">Logout</button>
     </nav>
 
 <script>
@@ -107,10 +193,64 @@
 
     function switchView(viewId) {
         document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-        document.getElementById('view-' + viewId).classList.add('active');
-        const nav = document.getElementById('bottom-nav');
-        nav.classList.toggle('hidden', !currentUser);
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        const nav = document.querySelector('.bottom-nav');
+        if (nav) nav.style.display = (currentUser && viewId !== 'login') ? 'flex' : 'none';
         window.scrollTo(0,0);
+    }
+
+    function updateVenue() {
+        activeVenueLink = document.getElementById('trainer-venue').value;
+        rackyTalk("Venue updated! Pins are now synchronized.");
+    }
+
+    function processInquiry() {
+        const parent = document.getElementById('parent-name').value;
+        const child = document.getElementById('child-name').value;
+        const phone = document.getElementById('parent-phone').value;
+        const age = document.getElementById('child-age').value;
+        const skill = document.getElementById('child-skill').value;
+        const time = document.getElementById('session-time').value;
+
+        if(!child || !parent || !phone || !age || !skill || !time) {
+            rackyTalk("I need all data points to begin the assessment! 🕒");
+            return;
+        }
+
+        students.unshift({ name: child, level: skill, parent: parent, phone: phone, age: age, time: time, icon: "⚡" });
+        rackyTalk(`System updated. ${child} is scheduled for ${time}.`);
+        renderRoster();
+        setTimeout(() => switchView('trainer'), 1500);
+    }
+
+    function renderRoster() {
+        const container = document.getElementById('roster-container');
+        if (!container) return;
+        container.innerHTML = students.map(s => {
+            const message = encodeURIComponent(`Hi ${s.name}, your performance baseline is confirmed for ${s.time}! 🎾\n\n📍 Location Pin: ${activeVenueLink}`);
+            return `
+                <div class="glass-card p-5 flex items-center justify-between mb-4 border-l-8 border-l-[#0070D1]">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-xl shadow-inner">${s.icon}</div>
+                        <div>
+                            <h4 class="font-black text-slate-900 uppercase tracking-tight">${s.name}</h4>
+                            <p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">${s.time} | ${s.level}</p>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/\( {s.phone}?text= \){message}" target="_blank" class="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-green-200">💬</a>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function rackyTalk(msg = "Ready to pilot?") {
+        const bubble = document.getElementById('racky-speech');
+        const txt = document.getElementById('racky-msg');
+        if (!bubble || !txt) return;
+        txt.innerText = msg;
+        bubble.style.opacity = "1";
+        setTimeout(() => { bubble.style.opacity = "0"; }, 4000);
     }
 
     function loginUser() {
@@ -118,38 +258,31 @@
         const password = document.getElementById('login-password').value.trim();
 
         if (!email || !password) {
-            rackyTalk("Enter email and password!");
+            rackyTalk("Please enter email and password to continue.");
             return;
         }
 
-        let role = email.includes('trainer') || email.endsWith('@trainer.com') ? 'trainer' : 'student';
+        // Placeholder role detection (customize as needed)
+        const role = email.toLowerCase().includes('trainer') || email.toLowerCase().includes('admin') ? 'trainer' : 'student';
         currentUser = { email, role };
-        localStorage.setItem('padelUser', JSON.stringify(currentUser));
 
-        rackyTalk(`Welcome, ${role}!`);
-        setTimeout(() => switchView(role === 'trainer' ? 'trainer' : 'student'), 1200);
+        rackyTalk(`Welcome, ${role}! Logging you in...`);
+        setTimeout(() => {
+            switchView(role === 'trainer' ? 'trainer' : 'student');
+        }, 1500);
     }
 
     function logoutUser() {
         currentUser = null;
-        localStorage.removeItem('padelUser');
-        rackyTalk("Logged out successfully.");
+        rackyTalk("Logged out. See you on the court! 👋");
         switchView('landing');
     }
 
-    // ... Keep your processInquiry(), renderRoster(), rackyTalk(), updateVenue(), listenToStudents() functions unchanged ...
-
-    window.addEventListener('load', () => {
-        const saved = localStorage.getItem('padelUser');
-        if (saved) {
-            currentUser = JSON.parse(saved);
-            switchView(currentUser.role === 'trainer' ? 'trainer' : 'student');
-            if (currentUser.role === 'trainer') listenToStudents(); // only trainers see roster updates
-        } else {
-            switchView('landing');
-        }
-        rackyTalk("Welcome to PadelPilotPro!");
-    });
+    window.onload = () => {
+        renderRoster();
+        rackyTalk("PadelPilotPro Online. 👋");
+        // Optional: auto-show login toolbar if desired
+    };
 </script>
 </body>
 </html>

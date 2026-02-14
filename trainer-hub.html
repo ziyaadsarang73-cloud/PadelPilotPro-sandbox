@@ -53,6 +53,8 @@
         .calendar-day:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(-2px); }
         .calendar-day.booked { background: rgba(0, 112, 209, 0.1); border: 2px solid var(--padel-blue); }
         .calendar-day.today { background: rgba(204, 255, 0, 0.15); border: 2px solid var(--padel-neon); }
+        .analytics-btn { padding: 6px 12px; font-size: 0.85rem; background: var(--padel-blue); color: white; border-radius: 9999px; margin-top: 6px; display: block; width: fit-content; margin-left: auto; margin-right: auto; }
+        .analytics-btn:hover { background: #0059a8; }
     </style>
 </head>
 <body>
@@ -117,10 +119,14 @@
                 <p class="text-slate-500 mb-6">Your schedule — auto-filled from enrollments</p>
 
                 <!-- Weekly View -->
-                <div id="weekly-view" class="grid grid-cols-7 gap-2 mb-6"></div>
+                <div id="weekly-view" class="grid grid-cols-7 gap-2 mb-6">
+                    <!-- Days populated by JS -->
+                </div>
 
                 <!-- Monthly View (hidden by default) -->
-                <div id="monthly-view" class="hidden grid grid-cols-7 gap-2 mb-6"></div>
+                <div id="monthly-view" class="hidden grid grid-cols-7 gap-2 mb-6">
+                    <!-- Days populated by JS -->
+                </div>
 
                 <button onclick="toggleCalendarView()" class="mt-4 w-full btn-primary" id="view-toggle">Expand to Full Month</button>
 
@@ -134,29 +140,27 @@
                 </div>
             </div>
 
-            <!-- Other Tabs (placeholders) -->
+            <!-- Roster Tab (simplified cards) -->
             <div id="roster" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Roster</h3>
                 <p class="text-slate-500 mb-6">Your active students</p>
-                <div class="space-y-4">
-                    <div class="glass-card p-5">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-xl">⚡</div>
-                            <div>
-                                <h4 class="font-bold">Ahmed Al Mansoori</h4>
-                                <p class="text-sm text-slate-600">Elite • Wednesday 5:00 PM</p>
-                            </div>
-                        </div>
-                    </div>
+                <input type="text" id="roster-search" placeholder="Search students by name..." class="w-full p-4 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none mb-6">
+                <div id="roster-container" class="space-y-4"></div>
+                <div id="empty-roster" class="hidden text-center text-slate-500 py-12">
+                    <i class="fas fa-users-slash text-6xl mb-4 text-blue-200"></i>
+                    <p class="text-lg font-bold">No students yet</p>
+                    <p class="text-sm">Generate an enrollment link to add your first player!</p>
                 </div>
             </div>
 
+            <!-- Messaging Tab -->
             <div id="messaging" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Messaging</h3>
                 <p class="text-slate-500 mb-6">Quick WhatsApp to your players</p>
                 <button class="w-full btn-primary">Send Bulk Message</button>
             </div>
 
+            <!-- Accounting Tab -->
             <div id="accounting" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Accounting</h3>
                 <p class="text-slate-500 mb-6">Track fees & payments</p>
@@ -166,6 +170,7 @@
                 </div>
             </div>
 
+            <!-- Analytics Tab -->
             <div id="analytics" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Analytics</h3>
                 <p class="text-slate-500 mb-6">Insights on your academy</p>
@@ -227,63 +232,36 @@
             rackyTalk(`Switched to ${tabName.charAt(0).toUpperCase() + tabName.slice(1)} tab!`);
         }
 
-        // Calendar Functions
-        function generateWeeklyCalendar() {
-            const weeklyView = document.getElementById('weekly-view');
-            weeklyView.innerHTML = '';
-            const today = new Date();
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1)); // Monday
+        function renderRoster(filteredStudents = students) {
+            const container = document.getElementById('roster-container');
+            const empty = document.getElementById('empty-roster');
+            container.innerHTML = '';
 
-            for (let i = 0; i < 7; i++) {
-                const day = new Date(startOfWeek);
-                day.setDate(startOfWeek.getDate() + i);
-                const dayName = day.toLocaleDateString('en-US', { weekday: 'short' });
-                const dayNumber = day.getDate();
-                const isToday = day.toDateString() === today.toDateString();
-
-                const dayElement = document.createElement('div');
-                dayElement.className = 'calendar-day';
-                if (isToday) dayElement.classList.add('today');
-                dayElement.innerHTML = `
-                    <div class="font-bold">${dayName}</div>
-                    <div class="text-sm">${dayNumber}</div>
-                `;
-                dayElement.onclick = () => selectDay(day);
-                weeklyView.appendChild(dayElement);
-            }
-        }
-
-        function toggleCalendarView() {
-            const weekly = document.getElementById('weekly-view');
-            const monthly = document.getElementById('monthly-view');
-            const toggleBtn = document.getElementById('view-toggle');
-            if (weekly.classList.contains('hidden')) {
-                weekly.classList.remove('hidden');
-                monthly.classList.add('hidden');
-                toggleBtn.textContent = 'Expand to Month';
+            if (filteredStudents.length === 0) {
+                empty.classList.remove('hidden');
+                container.classList.add('hidden');
             } else {
-                weekly.classList.add('hidden');
-                monthly.classList.remove('hidden');
-                toggleBtn.textContent = 'Back to Week';
+                empty.classList.add('hidden');
+                container.classList.remove('hidden');
+                filteredStudents.forEach(s => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-card p-5 text-center mb-4 border-l-8 border-l-[#0070D1]';
+                    card.innerHTML = `
+                        <div class="text-xl font-black text-slate-900 mb-2">${s.name}</div>
+                        <a href="student.html?studentId=${s.id}" class="analytics-btn">View Analytics</a>
+                    `;
+                    container.appendChild(card);
+                });
             }
         }
 
-        function selectDay(day) {
-            selectedDay = day;
-            rackyTalk(`Selected ${day.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`);
+        function filterRoster() {
+            const search = document.getElementById('roster-search').value.toLowerCase().trim();
+            const filtered = students.filter(s => s.name.toLowerCase().includes(search));
+            renderRoster(filtered);
         }
 
-        function populateCalendar() {
-            // Auto-populate from students
-            students.forEach(s => {
-                const dayName = s.time.split(' ')[0]; // e.g. "Monday"
-                // Future: match to calendar days and add booked class
-            });
-            rackyTalk("Calendar updated with all your sessions, Coach! No double bookings detected.");
-        }
-
-        function loadRosterAndCalendar() {
+        function loadRoster() {
             const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
             onSnapshot(q, (snapshot) => {
                 students = [];
@@ -291,16 +269,15 @@
                     students.push({ id: doc.id, ...doc.data() });
                 });
                 renderRoster();
-                populateCalendar();
+                rackyTalk(`Roster loaded — ${students.length} students active!`);
             });
         }
 
         window.onload = () => {
             checkAccess();
-            generateWeeklyCalendar();
-            loadRosterAndCalendar();
+            loadRoster();
             document.getElementById('roster-search').addEventListener('input', filterRoster);
-            rackyTalk("Trainer Hub ready, Coach! Calendar loaded — your week is packed.");
+            rackyTalk("Trainer Hub ready, Coach! Roster loaded.");
         };
     </script>
 </body>

@@ -53,18 +53,20 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Login Toolbar - blended into header */
+        /* Static Login Toolbar - now scrolls with page, no overlap */
         #login-toolbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 30;
             background: rgba(0, 112, 209, 0.92);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px 24px;
-            transition: all 0.3s ease;
+            padding: 12px 24px;
+            margin: 0 -2rem 2rem -2rem; /* extends full-width like header */
+        }
+
+        #login-toolbar .container {
+            max-width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
         }
 
         #login-toolbar button {
@@ -92,29 +94,18 @@
             background: #f0f9ff;
         }
 
-        /* Lower the banner content so toolbar doesn't cover anything */
-        main {
-            padding-top: 120px; /* Increased to push banner down below toolbar + extra space */
-        }
-
-        header {
-            position: relative;
-            z-index: 20; /* Ensure header stays above toolbar if needed */
-        }
-
         @media (max-width: 640px) {
             #login-toolbar {
-                padding: 8px 16px;
-                flex-wrap: wrap;
+                padding: 10px 16px;
+            }
+            #login-toolbar .container {
                 justify-content: center;
-                gap: 8px;
+                flex-wrap: wrap;
+                gap: 10px;
             }
             #login-toolbar button {
-                padding: 8px 16px;
-                font-size: 0.875rem;
-            }
-            main {
-                padding-top: 110px; /* Slightly less on mobile */
+                padding: 8px 18px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -140,8 +131,9 @@
         </div>
     </header>
 
+    <!-- Static Login Toolbar - now below header, scrolls normally -->
     <div id="login-toolbar">
-        <div class="flex gap-3 justify-end">
+        <div class="container">
             <button onclick="switchView('login')" class="login-btn">
                 Login to Hub
             </button>

@@ -6,6 +6,45 @@
     <title>PadelPilotPro | Performance Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK v10+ modular (CDN) -->
+    <script type="module">
+      // Import needed Firebase functions
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        onSnapshot,
+        query,
+        orderBy,
+        serverTimestamp
+      } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+      // Your config (from your message)
+      const firebaseConfig = {
+        apiKey: "AIzaSyDimi5qy6YOnY7MsLymNUKtIxW-kPmH870",
+        authDomain: "padelpilotpro.firebaseapp.com",
+        projectId: "padelpilotpro",
+        storageBucket: "padelpilotpro.firebasestorage.app",
+        messagingSenderId: "326604561873",
+        appId: "1:326604561873:web:d3deb1cef55a913137d4f0"
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Make functions available globally
+      window.db = db;
+      window.collection = collection;
+      window.addDoc = addDoc;
+      window.onSnapshot = onSnapshot;
+      window.query = query;
+      window.orderBy = orderBy;
+      window.serverTimestamp = serverTimestamp;
+    </script>
+
     <style>
         :root {
             --padel-blue: #0070D1;
@@ -53,13 +92,12 @@
             border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Static Login Toolbar - now scrolls with page, no overlap */
         #login-toolbar {
             background: rgba(0, 112, 209, 0.92);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
             padding: 12px 24px;
-            margin: 0 -2rem 2rem -2rem; /* extends full-width like header */
+            margin: 0 -2rem 2rem -2rem;
         }
 
         #login-toolbar .container {
@@ -131,7 +169,6 @@
         </div>
     </header>
 
-    <!-- Static Login Toolbar - now below header, scrolls normally -->
     <div id="login-toolbar">
         <div class="container">
             <button onclick="switchView('login')" class="login-btn">
@@ -227,44 +264,80 @@
     let activeVenueLink = "https://maps.google.com/?q=Main+Club";
     let currentUser = null;
 
-    function switchView(viewId) {
-        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-        const target = document.getElementById('view-' + viewId);
-        if (target) target.classList.add('active');
-        const nav = document.querySelector('.bottom-nav');
-        if (nav) nav.style.display = (currentUser && viewId !== 'login') ? 'flex' : 'none';
-        window.scrollTo(0,0);
+    // ────────────────────────────────────────────────
+    // Real-time listener for students from Firestore
+    function listenToStudents() {
+        const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            students = [];
+            snapshot.forEach((doc) => {
+                students.push({ id: doc.id, ...doc.data() });
+            });
+            renderRoster();
+            if (students.length > 0) {
+                rackyTalk(`Roster updated — ${students.length} pilots loaded from cloud.`);
+            }
+        }, (error) => {
+            console.error("Firestore error:", error);
+            rackyTalk("Couldn't connect to cloud database…");
+        });
     }
 
-    function updateVenue() {
-        activeVenueLink = document.getElementById('trainer-venue').value;
-        rackyTalk("Venue updated! Pins are now synchronized.");
-    }
+    // ────────────────────────────────────────────────
+    async function processInquiry() {
+        const parent = document.getElementById('parent-name').value.trim();
+        const child  = document.getElementById('child-name').value.trim();
+        const phone  = document.getElementById('parent-phone').value.trim();
+        const age    = document.getElementById('child-age').value.trim();
+        const skill  = document.getElementById('child-skill').value;
+        const time   = document.getElementById('session-time').value;
 
-    function processInquiry() {
-        const parent = document.getElementById('parent-name').value;
-        const child = document.getElementById('child-name').value;
-        const phone = document.getElementById('parent-phone').value;
-        const age = document.getElementById('child-age').value;
-        const skill = document.getElementById('child-skill').value;
-        const time = document.getElementById('session-time').value;
-
-        if(!child || !parent || !phone || !age || !skill || !time) {
+        if (!child || !parent || !phone || !age || !skill || !time) {
             rackyTalk("I need all data points to begin the assessment! 🕒");
             return;
         }
 
-        students.unshift({ name: child, level: skill, parent: parent, phone: phone, age: age, time: time, icon: "⚡" });
-        rackyTalk(`System updated. ${child} is scheduled for ${time}.`);
-        renderRoster();
-        setTimeout(() => switchView('trainer'), 1500);
+        try {
+            const newStudent = {
+                name: child,
+                level: skill,
+                parent: parent,
+                phone: phone,
+                age: Number(age),
+                time: time,
+                icon: "⚡",
+                createdAt: serverTimestamp(),
+                enrolledAt: new Date().toISOString()
+            };
+
+            await addDoc(collection(db, "students"), newStudent);
+
+            rackyTalk(`Great! ${child} saved to cloud for ${time}.`);
+            setTimeout(() => switchView('trainer'), 1500);
+
+            // Clear form
+            document.getElementById('parent-name').value = '';
+            document.getElementById('child-name').value = '';
+            document.getElementById('parent-phone').value = '';
+            document.getElementById('child-age').value = '';
+            document.getElementById('child-skill').value = '';
+            document.getElementById('session-time').value = '';
+        } catch (error) {
+            console.error("Error saving to Firestore:", error);
+            rackyTalk("Failed to save to cloud. Check connection?");
+        }
     }
 
     function renderRoster() {
         const container = document.getElementById('roster-container');
         if (!container) return;
+
         container.innerHTML = students.map(s => {
-            const message = encodeURIComponent(`Hi ${s.name}, your performance baseline is confirmed for ${s.time}! 🎾\n\n📍 Location Pin: ${activeVenueLink}`);
+            const message = encodeURIComponent(
+                `Hi ${s.name}, your performance baseline is confirmed for ${s.time}! 🎾\n\n` +
+                `📍 Location Pin: ${activeVenueLink}`
+            );
+
             return `
                 <div class="glass-card p-5 flex items-center justify-between mb-4 border-l-8 border-l-[#0070D1]">
                     <div class="flex items-center gap-4">
@@ -289,6 +362,20 @@
         setTimeout(() => { bubble.style.opacity = "0"; }, 4000);
     }
 
+    function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        const nav = document.querySelector('.bottom-nav');
+        if (nav) nav.style.display = (currentUser && viewId !== 'login') ? 'flex' : 'none';
+        window.scrollTo(0,0);
+    }
+
+    function updateVenue() {
+        activeVenueLink = document.getElementById('trainer-venue').value;
+        rackyTalk("Venue updated! Pins are now synchronized.");
+    }
+
     function loginUser() {
         const email = document.getElementById('login-email').value.trim();
         const password = document.getElementById('login-password').value.trim();
@@ -304,6 +391,7 @@
         rackyTalk(`Welcome, ${role}! Logging you in...`);
         setTimeout(() => {
             switchView(role === 'trainer' ? 'trainer' : 'student');
+            if (role === 'trainer') listenToStudents(); // only trainers load roster
         }, 1500);
     }
 
@@ -314,7 +402,7 @@
     }
 
     window.onload = () => {
-        renderRoster();
+        renderRoster(); // initial empty state
         rackyTalk("PadelPilotPro Online. 👋");
     };
 </script>

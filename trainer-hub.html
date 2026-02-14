@@ -47,8 +47,37 @@
         .tab-button.active { color: var(--padel-blue); border-bottom: 3px solid var(--padel-blue); font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .student-card { background: linear-gradient(135deg, rgba(0,112,209,0.1) 0%, rgba(204,255,0,0.05) 100%), white; border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid var(--padel-blue); text-align: center; }
-        .analytics-btn { padding: 8px 16px; font-size: 0.9rem; background: var(--padel-blue); color: white; border-radius: 9999px; margin-top: 8px; display: inline-block; transition: all 0.2s; }
+        .student-card { 
+            background: linear-gradient(135deg, rgba(0,112,209,0.15) 0%, rgba(204,255,0,0.1) 100%), white; 
+            border-radius: 1.5rem; 
+            padding: 1.25rem; 
+            margin-bottom: 1rem; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            border-left: 4px solid var(--padel-blue); 
+            text-align: center; 
+        }
+        .photo-square { 
+            width: 100px; 
+            height: 100px; 
+            background: #e0e7ff; 
+            border-radius: 1rem; 
+            margin: 0 auto 0.75rem; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 2.5rem; 
+            color: #64748b; 
+        }
+        .analytics-btn { 
+            padding: 6px 14px; 
+            font-size: 0.85rem; 
+            background: var(--padel-blue); 
+            color: white; 
+            border-radius: 9999px; 
+            margin-top: 6px; 
+            display: inline-block; 
+            transition: all 0.2s; 
+        }
         .analytics-btn:hover { background: #0059a8; transform: translateY(-1px); }
     </style>
 </head>
@@ -222,7 +251,16 @@
                     const card = document.createElement('div');
                     card.className = 'student-card';
                     card.innerHTML = `
-                        <div class="text-xl font-black text-slate-900 mb-2">${s.name}</div>
+                        <div class="photo-square mx-auto">
+                            <i class="fas fa-user text-5xl text-slate-400"></i>
+                        </div>
+                        <div class="text-xl font-black text-slate-900 mb-1">${s.name}</div>
+                        <div class="text-sm text-slate-600 mb-2">Age: ${s.age || 'N/A'}</div>
+                        <div class="flex justify-center gap-2 mb-3 text-xl">
+                            <span class="text-yellow-500">🥇</span>
+                            <span class="text-gray-400">🥈</span>
+                            <span class="text-yellow-600">🏆</span>
+                        </div>
                         <a href="student.html?studentId=${s.id}" class="analytics-btn">View Analytics</a>
                     `;
                     container.appendChild(card);

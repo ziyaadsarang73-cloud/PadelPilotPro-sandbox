@@ -6,9 +6,7 @@
     <title>Trainer Hub | PadelPilotPro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <!-- Firebase SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
       import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -38,7 +36,7 @@
             --soft-gray: #F0F7FF;
         }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; margin: 0 auto; max-width: 480px; overflow-x: hidden; }
-        .glass-card { background: white; border-radius: 2.5rem; box-shadow: 0 10px 30px rgba(0, 112, 209, 0.08); border: 1px solid rgba(255, 255, 255, 0.9); overflow: hidden; }
+        .glass-card { background: linear-gradient(135deg, rgba(0,112,209,0.1) 0%, rgba(204,255,0,0.05) 100%), white; border-radius: 2.5rem; box-shadow: 0 10px 30px rgba(0, 112, 209, 0.08); border: 1px solid rgba(255, 255, 255, 0.9); overflow: hidden; }
         .btn-primary { background: var(--padel-blue); color: white; padding: 1.25rem; border-radius: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; box-shadow: 0 8px 20px rgba(0, 112, 209, 0.25); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0, 112, 209, 0.35); }
         .btn-primary:active { transform: scale(0.97); }
@@ -49,7 +47,7 @@
         .tab-button.active { color: var(--padel-blue); border-bottom: 3px solid var(--padel-blue); font-weight: bold; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .student-card { background: white; border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid var(--padel-blue); text-align: center; }
+        .student-card { background: linear-gradient(135deg, rgba(0,112,209,0.1) 0%, rgba(204,255,0,0.05) 100%), white; border-radius: 1.5rem; padding: 1.25rem; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-left: 4px solid var(--padel-blue); text-align: center; }
         .analytics-btn { padding: 8px 16px; font-size: 0.9rem; background: var(--padel-blue); color: white; border-radius: 9999px; margin-top: 8px; display: inline-block; transition: all 0.2s; }
         .analytics-btn:hover { background: #0059a8; transform: translateY(-1px); }
     </style>
@@ -110,12 +108,12 @@
                 </button>
             </div>
 
-            <!-- Roster Tab -->
+            <!-- Roster Tab (collector cards) -->
             <div id="roster" class="tab-content p-6 active">
                 <h3 class="text-xl font-black mb-4">Roster</h3>
                 <p class="text-slate-500 mb-6">Your active students</p>
                 <input type="text" id="roster-search" placeholder="Search students by name..." class="w-full p-4 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none mb-6">
-                <div id="roster-container" class="space-y-4"></div>
+                <div id="roster-container" class="grid grid-cols-2 gap-4"></div>
                 <div id="empty-roster" class="hidden text-center text-slate-500 py-12">
                     <i class="fas fa-users-slash text-6xl mb-4 text-blue-200"></i>
                     <p class="text-lg font-bold">No students yet</p>
@@ -123,16 +121,13 @@
                 </div>
             </div>
 
-            <!-- Calendar Tab (placeholder) -->
+            <!-- Calendar Tab (collector slots) -->
             <div id="calendar" class="tab-content p-6 hidden">
                 <h3 class="text-xl font-black mb-4">Calendar & Planner</h3>
                 <p class="text-slate-500 mb-6">Your schedule — auto-filled from enrollments</p>
-                <div class="grid grid-cols-7 gap-2 mb-6">
-                    <div class="calendar-day booked"><div>Mon</div><div>14</div></div>
-                    <div class="calendar-day today"><div>Tue</div><div>15</div></div>
-                    <!-- Placeholder days -->
+                <div id="calendar-container" class="grid grid-cols-1 gap-4">
+                    <!-- Booked slots populated by JS -->
                 </div>
-                <button class="mt-4 w-full btn-primary">Expand to Full Month</button>
             </div>
 
             <!-- Other Tabs -->
@@ -225,7 +220,7 @@
                 container.classList.remove('hidden');
                 filteredStudents.forEach(s => {
                     const card = document.createElement('div');
-                    card.className = 'glass-card p-5 text-center mb-4 border-l-8 border-l-[#0070D1]';
+                    card.className = 'student-card';
                     card.innerHTML = `
                         <div class="text-xl font-black text-slate-900 mb-2">${s.name}</div>
                         <a href="student.html?studentId=${s.id}" class="analytics-btn">View Analytics</a>

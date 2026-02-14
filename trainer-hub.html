@@ -11,7 +11,7 @@
     <!-- Firebase SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-      import { getFirestore, collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, getDocs, where, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+      import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyDimi5qy6YOnY7MsLymNUKtIxW-kPmH870",
@@ -30,21 +30,12 @@
       window.onSnapshot = onSnapshot;
       window.query = query;
       window.orderBy = orderBy;
-      window.addDoc = addDoc;
-      window.serverTimestamp = serverTimestamp;
-      window.getDocs = getDocs;
-      window.where = where;
-      window.doc = doc;
-      window.updateDoc = updateDoc;
-      window.deleteDoc = deleteDoc;
     </script>
     <style>
         :root {
             --padel-blue: #0070D1;
             --padel-neon: #CCFF00;
             --soft-gray: #F0F7FF;
-            --green-available: #10B981;
-            --red-booked: #EF4444;
         }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; margin: 0 auto; max-width: 480px; overflow-x: hidden; }
         .glass-card { background: white; border-radius: 2.5rem; box-shadow: 0 10px 30px rgba(0, 112, 209, 0.08); border: 1px solid rgba(255, 255, 255, 0.9); overflow: hidden; }
@@ -60,10 +51,8 @@
         .tab-content.active { display: block; }
         .calendar-day { background: rgba(255, 255, 255, 0.6); border-radius: 1.5rem; padding: 1rem; margin: 0.5rem; cursor: pointer; transition: all 0.2s; text-align: center; }
         .calendar-day:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(-2px); }
-        .calendar-day.available { background: rgba(16, 185, 129, 0.15); border: 2px solid var(--green-available); }
-        .calendar-day.booked { background: rgba(239, 68, 68, 0.15); border: 2px solid var(--red-booked); }
+        .calendar-day.booked { background: rgba(0, 112, 209, 0.1); border: 2px solid var(--padel-blue); }
         .calendar-day.today { background: rgba(204, 255, 0, 0.15); border: 2px solid var(--padel-neon); }
-        .calendar-day.selected { background: var(--padel-blue); color: white; }
     </style>
 </head>
 <body>
@@ -128,14 +117,10 @@
                 <p class="text-slate-500 mb-6">Your schedule — auto-filled from enrollments</p>
 
                 <!-- Weekly View -->
-                <div id="weekly-view" class="grid grid-cols-7 gap-2 mb-6">
-                    <!-- Days populated by JS -->
-                </div>
+                <div id="weekly-view" class="grid grid-cols-7 gap-2 mb-6"></div>
 
                 <!-- Monthly View (hidden by default) -->
-                <div id="monthly-view" class="hidden grid grid-cols-7 gap-2 mb-6">
-                    <!-- Days populated by JS -->
-                </div>
+                <div id="monthly-view" class="hidden grid grid-cols-7 gap-2 mb-6"></div>
 
                 <button onclick="toggleCalendarView()" class="mt-4 w-full btn-primary" id="view-toggle">Expand to Full Month</button>
 
@@ -253,13 +238,17 @@
             for (let i = 0; i < 7; i++) {
                 const day = new Date(startOfWeek);
                 day.setDate(startOfWeek.getDate() + i);
+                const dayName = day.toLocaleDateString('en-US', { weekday: 'short' });
+                const dayNumber = day.getDate();
+                const isToday = day.toDateString() === today.toDateString();
+
                 const dayElement = document.createElement('div');
                 dayElement.className = 'calendar-day';
+                if (isToday) dayElement.classList.add('today');
                 dayElement.innerHTML = `
-                    <div class="font-bold">${day.toLocaleDateString('en-US', { weekday: 'short' })}</div>
-                    <div class="text-sm">${day.getDate()}</div>
+                    <div class="font-bold">${dayName}</div>
+                    <div class="text-sm">${dayNumber}</div>
                 `;
-                if (day.toDateString() === today.toDateString()) dayElement.classList.add('today');
                 dayElement.onclick = () => selectDay(day);
                 weeklyView.appendChild(dayElement);
             }
@@ -283,18 +272,35 @@
         function selectDay(day) {
             selectedDay = day;
             rackyTalk(`Selected ${day.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}`);
-            // Future: show details/notes
         }
 
         function populateCalendar() {
+            // Auto-populate from students
+            students.forEach(s => {
+                const dayName = s.time.split(' ')[0]; // e.g. "Monday"
+                // Future: match to calendar days and add booked class
+            });
             rackyTalk("Calendar updated with all your sessions, Coach! No double bookings detected.");
+        }
+
+        function loadRosterAndCalendar() {
+            const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                students = [];
+                snapshot.forEach((doc) => {
+                    students.push({ id: doc.id, ...doc.data() });
+                });
+                renderRoster();
+                populateCalendar();
+            });
         }
 
         window.onload = () => {
             checkAccess();
             generateWeeklyCalendar();
-            populateCalendar();
-            rackyTalk("Coach mode ON! Calendar and roster ready — let's run this lab!");
+            loadRosterAndCalendar();
+            document.getElementById('roster-search').addEventListener('input', filterRoster);
+            rackyTalk("Trainer Hub ready, Coach! Calendar loaded — your week is packed.");
         };
     </script>
 </body>

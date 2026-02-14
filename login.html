@@ -1,1 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login | PadelPilotPro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* Reuse same styles from index.html - copy the <style> block here if needed */
+        :root { --padel-blue: #0070D1; --padel-neon: #CCFF00; --soft-gray: #F0F7FF; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; margin: 0 auto; max-width: 480px; overflow-x: hidden; }
+        .glass-card { background: white; border-radius: 2.5rem; box-shadow: 0 20px 50px -10px rgba(0, 112, 209, 0.1); border: 1px solid rgba(255, 255, 255, 0.8); }
+        .btn-primary { background: var(--padel-blue); color: white; padding: 1.25rem; border-radius: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 10px 25px -5px rgba(0, 112, 209, 0.3); }
+        .btn-primary:active { transform: scale(0.96); }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
+        .floating-racky { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body>
 
+    <header class="bg-[#0070D1] pt-10 pb-16 px-8 mb-[-2rem] rounded-b-3xl relative overflow-hidden">
+        <div class="flex justify-between items-start relative z-10">
+            <div>
+                <p class="text-white italic font-bold text-lg mb-1">speed</p>
+                <h1 class="text-white text-3xl font-black italic tracking-tighter leading-none">
+                    PADELPILOT<span class="text-[var(--padel-neon)]">PRO</span>
+                </h1>
+                <p class="text-blue-100 text-[11px] font-bold mt-1 uppercase tracking-[0.2em]">Performance Lab</p>
+            </div>
+            <div class="w-24 h-24 mt-[-1rem] cursor-pointer" onclick="rackyTalk()">
+                <img src="60117.jpg" alt="Racky" class="w-full h-full object-contain drop-shadow-2xl floating-racky">
+            </div>
+        </div>
+        <div id="racky-speech" class="absolute -bottom-10 right-8 bg-white p-4 rounded-2xl rounded-tr-none shadow-xl opacity-0 transition-all duration-300 pointer-events-none z-50">
+            <p id="racky-msg" class="text-[11px] font-bold text-slate-800 leading-tight"></p>
+        </div>
+    </header>
+
+    <main class="pb-32 px-6 py-12">
+        <div class="glass-card p-10 max-w-md mx-auto">
+            <h2 class="text-3xl font-black text-center mb-8">Sign In</h2>
+            <p class="text-center text-slate-500 mb-8">Access Trainer Hub or your Pro-Path</p>
+            
+            <div class="space-y-6">
+                <input type="email" id="login-email" placeholder="Email" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                <input type="password" id="login-password" placeholder="Password" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                <input type="text" id="subscription-code" placeholder="Subscription Code (for trainers)" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                <button onclick="loginUser()" class="w-full btn-primary">Sign In</button>
+                <button onclick="window.location.href='index.html'" class="w-full text-center text-slate-500 mt-4 underline">Back to Enrollment</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function rackyTalk(msg = "Ready to pilot?") {
+            const bubble = document.getElementById('racky-speech');
+            const txt = document.getElementById('racky-msg');
+            if (!bubble || !txt) return;
+            txt.innerText = msg;
+            bubble.style.opacity = "1";
+            setTimeout(() => { bubble.style.opacity = "0"; }, 4000);
+        }
+
+        function loginUser() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const code = document.getElementById('subscription-code').value.trim();
+
+            if (!email || !password) {
+                rackyTalk("Please enter email and password.");
+                return;
+            }
+
+            // Simple trainer check (upgrade to Firebase later)
+            const isTrainer = code && code.startsWith('TRAINER-') && code.length > 10;
+
+            if (isTrainer) {
+                localStorage.setItem('currentUser', JSON.stringify({ email, role: 'trainer', subscribed: true }));
+                rackyTalk("Welcome back, Coach! Loading Trainer Hub...");
+                setTimeout(() => { window.location.href = 'trainer-hub.html'; }, 1500);
+            } else {
+                localStorage.setItem('currentUser', JSON.stringify({ email, role: 'student' }));
+                rackyTalk("Welcome! Loading your Pro-Path...");
+                setTimeout(() => { window.location.href = 'student.html'; }, 1500);
+            }
+        }
+
+        window.onload = () => {
+            rackyTalk("Sign in to access your hub.");
+        };
+    </script>
+</body>
+</html>

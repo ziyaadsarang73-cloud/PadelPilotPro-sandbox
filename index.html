@@ -2,236 +2,291 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PadelPilotPro - Performance Lab</title>
-    <!-- Tailwind CSS CDN -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PadelPilotPro | Performance Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK (v12.x - latest stable as of early 2026) -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+      import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+      // ────────────────────────────────────────────────
+      // PASTE YOUR FIREBASE CONFIG HERE
+      const firebaseConfig = {
+        apiKey: "AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+        authDomain: "your-project-id.firebaseapp.com",
+        projectId: "your-project-id",
+        storageBucket: "your-project-id.appspot.com",
+        messagingSenderId: "123456789012",
+        appId: "1:123456789012:web:xxxxxxxxxxxxxxxxxxxxxx"
+      };
+      // ────────────────────────────────────────────────
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Expose to global scope for vanilla JS usage
+      window.db = db;
+      window.collection = collection;
+      window.addDoc = addDoc;
+      window.onSnapshot = onSnapshot;
+      window.query = query;
+      window.orderBy = orderBy;
+      window.serverTimestamp = serverTimestamp;
+    </script>
+
     <style>
-        /* Neumorphic Glass Card Styles */
-        .neumorphic-card {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 20px;
-            box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.1), -8px -8px 16px rgba(255, 255, 255, 0.5);
-            padding: 1.5rem;
-            backdrop-filter: blur(10px);
+        :root {
+            --padel-blue: #0070D1;
+            --padel-neon: #CCFF00;
+            --soft-gray: #F0F7FF;
+        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; }
+        
+        .glass-card {
+            background: white;
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 50px -10px rgba(0, 112, 209, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        /* Floating Mascot Animation */
+        .btn-primary {
+            background: var(--padel-blue);
+            color: white;
+            padding: 1.25rem;
+            border-radius: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            box-shadow: 0 10px 25px -5px rgba(0, 112, 209, 0.3);
+        }
+        .btn-primary:active { transform: scale(0.96); }
+
         @keyframes float {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-12px); }
             100% { transform: translateY(0px); }
         }
+        .floating-racky { animation: float 3s ease-in-out infinite; }
 
-        .mascot {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            animation: float 3s ease-in-out infinite;
-            z-index: 50;
-        }
+        .view-section { display: none; }
+        .view-section.active { display: block; }
 
-        .speech-bubble {
-            position: absolute;
-            top: -50px;
-            left: -150px;
-            background: white;
-            border-radius: 20px;
-            padding: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            width: 200px;
-            text-align: center;
-            display: none;
-        }
-
-        .speech-bubble:after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            right: 20px;
-            border-width: 10px;
-            border-style: solid;
-            border-color: white transparent transparent transparent;
-        }
-
-        /* Smooth Transitions */
-        .transition-all {
-            transition: all 0.3s ease;
-        }
-
-        /* Light Blue Palette */
-        body {
-            background: linear-gradient(to bottom, #E0F7FA, #B3E5FC);
-            color: #333;
+        .bottom-nav {
+            bottom: 20px; left: 20px; right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(15px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
         }
     </style>
 </head>
-<body class="min-h-screen font-sans antialiased">
-    <!-- Mascot: Racky (using a simple emoji for demo; replace with image if available) -->
-    <div class="mascot">
-        <div class="text-6xl">🏓</div> <!-- Racky Mascot Emoji -->
-        <div id="speech-bubble" class="speech-bubble">Welcome to PadelPilotPro!</div>
-    </div>
+<body>
 
-    <!-- Navigation for Views -->
-    <nav class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-md p-4 flex justify-around z-40">
-        <button onclick="showView('landing')" class="px-4 py-2 rounded-full bg-blue-100 hover:bg-blue-200 transition-all">Landing</button>
-        <button onclick="showView('trainer-hub')" class="px-4 py-2 rounded-full bg-blue-100 hover:bg-blue-200 transition-all">Trainer Hub</button>
-        <button onclick="showView('student-path')" class="px-4 py-2 rounded-full bg-blue-100 hover:bg-blue-200 transition-all">Student Pro-Path 📈</button>
+    <header class="bg-[#0070D1] pt-12 pb-24 px-8 mb-[-4rem] rounded-b-[4rem] relative overflow-hidden">
+        <div class="flex justify-between items-start relative z-10">
+            <div>
+                <p class="text-white italic font-bold text-lg mb-1">speed</p>
+                <h1 class="text-white text-3xl font-black italic tracking-tighter leading-none">
+                    PADELPILOT<span class="text-[var(--padel-neon)]">PRO</span>
+                </h1>
+                <p class="text-blue-100 text-[11px] font-bold mt-1 uppercase tracking-[0.2em]">Performance Lab</p>
+            </div>
+            <div class="w-24 h-24 mt-[-1rem] cursor-pointer" onclick="rackyTalk()">
+                <img src="60117.jpg" alt="Racky" class="w-full h-full object-contain drop-shadow-2xl floating-racky">
+            </div>
+        </div>
+
+        <div id="racky-speech" class="absolute -bottom-10 right-8 bg-white p-4 rounded-2xl rounded-tr-none shadow-xl opacity-0 transition-all duration-300 pointer-events-none z-50">
+            <p id="racky-msg" class="text-[11px] font-bold text-slate-800 leading-tight"></p>
+        </div>
+    </header>
+
+    <main id="view-container" class="pb-32">
+
+        <section id="view-trainer" class="view-section px-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">The Roster</h2>
+                <select id="trainer-venue" onchange="updateVenue()" class="bg-white px-4 py-2 rounded-xl text-[10px] font-bold border border-slate-100 shadow-sm outline-none">
+                    <option value="https://maps.google.com/?q=Main+Club">Main Club</option>
+                    <option value="https://maps.google.com/?q=Downtown+Arena">Downtown Arena</option>
+                </select>
+            </div>
+            <div id="roster-container" class="space-y-4"></div>
+        </section>
+
+        <section id="view-student" class="view-section px-6">
+            <div class="bg-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden mb-6 shadow-xl">
+                <p class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-2">Performance Tier</p>
+                <h3 class="text-4xl font-black italic mb-6 uppercase text-[var(--padel-neon)]">Elite Junior</h3>
+                <div class="flex gap-2">
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">🥇</div>
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center opacity-30">⚡</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-landing" class="view-section active p-6">
+            <div class="glass-card p-10 mb-6">
+                <div class="inline-block px-4 py-1.5 mb-6 text-[10px] font-black tracking-widest text-white uppercase bg-[#0070D1] rounded-full">Elite Training</div>
+                <h1 class="text-6xl font-extrabold text-[#1A1A1A] leading-[0.85] tracking-tighter mb-8 italic">MASTER <br/> <span class="text-[#0070D1]">THE COURT.</span></h1>
+                <p class="text-slate-500 text-sm leading-relaxed mb-10 font-medium">Professional coaching for all levels, driven by the <span class="text-slate-900 font-bold">Pro-Path</span> data system.</p>
+                <button onclick="switchView('trainer')" class="w-full btn-primary text-sm">Open Trainer Hub</button>
+            </div>
+
+            <div class="px-2 pb-12">
+                <h3 class="text-xl font-black text-slate-900 mb-6 ml-2">Pilot Enrollment</h3>
+                <div class="space-y-4">
+                    <input type="text" id="parent-name" placeholder="Full Name (Player/Guardian)" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                    <input type="text" id="child-name" placeholder="Player Name" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                    <div class="flex gap-4">
+                        <input type="number" id="child-age" placeholder="Age" class="w-1/3 p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                        <select id="child-skill" class="w-2/3 p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none appearance-none">
+                            <option value="" disabled selected>Experience Level</option>
+                            <option value="Foundation">Foundation (Beginner)</option>
+                            <option value="Competitive">Competitive (Intermediate)</option>
+                            <option value="Elite">Elite (Advanced)</option>
+                        </select>
+                    </div>
+                    <select id="session-time" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none appearance-none">
+                        <option value="" disabled selected>Preferred Time Slot</option>
+                        <option value="Monday 4:00 PM">Monday 4:00 PM</option>
+                        <option value="Wednesday 5:00 PM">Wednesday 5:00 PM</option>
+                    </select>
+                    <input type="tel" id="parent-phone" placeholder="WhatsApp Number" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                    <button onclick="processInquiry()" class="w-full btn-primary flex items-center justify-center gap-3 mt-4">Confirm Baseline Session 🎾</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <nav class="bottom-nav fixed flex justify-around items-center py-5 z-40" style="display: none;">
+        <button onclick="switchView('landing')" class="p-2">🏠</button>
+        <button onclick="switchView('trainer')" class="p-2">📋</button>
+        <button onclick="switchView('student')" class="p-2">📈</button>
     </nav>
 
-    <!-- Landing Page: Enrollment Engine -->
-    <section id="landing" class="container mx-auto mt-20 p-4">
-        <div class="neumorphic-card text-center mb-8">
-            <h1 class="text-4xl font-bold mb-4">Welcome to PadelPilotPro Performance Lab</h1>
-            <p class="text-lg">Elevate your game with data-driven training for elite players.</p>
-        </div>
+<script>
+    let students = [];               // local cache updated in real-time
+    let activeVenueLink = "https://maps.google.com/?q=Main+Club";
 
-        <form id="enrollment-form" class="neumorphic-card max-w-md mx-auto">
-            <div class="mb-4">
-                <label for="parent-name" class="block text-sm font-medium">Parent/Player Name</label>
-                <input type="text" id="parent-name" class="w-full p-2 rounded-lg border border-gray-300">
-            </div>
-            <div class="mb-4">
-                <label for="child-name" class="block text-sm font-medium">Child Name</label>
-                <input type="text" id="child-name" class="w-full p-2 rounded-lg border border-gray-300">
-            </div>
-            <div class="mb-4">
-                <label for="age" class="block text-sm font-medium">Age</label>
-                <input type="number" id="age" class="w-full p-2 rounded-lg border border-gray-300">
-            </div>
-            <div class="mb-4">
-                <label for="skill-level" class="block text-sm font-medium">Skill Level</label>
-                <select id="skill-level" class="w-full p-2 rounded-lg border border-gray-300">
-                    <option>Foundation</option>
-                    <option>Competitive</option>
-                    <option>Elite</option>
-                </select>
-            </div>
-            <div class="mb-4">
-                <label for="time-slot" class="block text-sm font-medium">Preferred Time Slot</label>
-                <select id="time-slot" class="w-full p-2 rounded-lg border border-gray-300">
-                    <option>9:00 AM - 10:00 AM</option>
-                    <option>10:00 AM - 11:00 AM</option>
-                    <option>11:00 AM - 12:00 PM</option>
-                    <!-- Add more slots as needed -->
-                </select>
-            </div>
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition-all">Enroll Now</button>
-        </form>
-    </section>
+    function switchView(viewId) {
+        document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+        const target = document.getElementById('view-' + viewId);
+        if (target) target.classList.add('active');
+        const nav = document.querySelector('.bottom-nav');
+        if (nav) nav.style.display = (viewId === 'landing') ? 'none' : 'flex';
+        window.scrollTo(0,0);
+    }
 
-    <!-- Trainer Hub: Roster & Management -->
-    <section id="trainer-hub" class="container mx-auto mt-20 p-4 hidden">
-        <div class="neumorphic-card mb-8">
-            <h2 class="text-3xl font-bold mb-4">Trainer Hub</h2>
-            <div class="mb-4">
-                <label for="venue" class="block text-sm font-medium">Select Venue</label>
-                <select id="venue" class="w-full p-2 rounded-lg border border-gray-300" onchange="updateVenue(this.value)">
-                    <option value="Main Club|https://maps.google.com/?q=Main+Club">Main Club</option>
-                    <option value="Downtown Arena|https://maps.google.com/?q=Downtown+Arena">Downtown Arena</option>
-                    <!-- Add more venues -->
-                </select>
-            </div>
-            <p id="pinned-location" class="text-center">Pinned Location: Main Club</p>
-        </div>
+    function updateVenue() {
+        activeVenueLink = document.getElementById('trainer-venue').value;
+        rackyTalk("Venue updated! Pins are now synchronized.");
+    }
 
-        <div id="roster" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Student cards will be added here dynamically -->
-        </div>
-    </section>
+    async function processInquiry() {
+        const parent = document.getElementById('parent-name').value.trim();
+        const child  = document.getElementById('child-name').value.trim();
+        const phone  = document.getElementById('parent-phone').value.trim();
+        const age    = document.getElementById('child-age').value.trim();
+        const skill  = document.getElementById('child-skill').value;
+        const time   = document.getElementById('session-time').value;
 
-    <!-- Student Pro-Path: Growth Tracking -->
-    <section id="student-path" class="container mx-auto mt-20 p-4 hidden">
-        <div class="neumorphic-card mb-8">
-            <h2 class="text-3xl font-bold mb-4">Student Pro-Path 📈</h2>
-            <p>Track your growth, tiers, and milestones.</p>
-        </div>
-
-        <div id="growth-tracking" class="neumorphic-card">
-            <h3 class="text-2xl font-semibold mb-2">Your Progress</h3>
-            <ul class="list-disc pl-6">
-                <li>Growth Level: Intermediate</li>
-                <li>Performance Tier: Competitive</li>
-                <li>Earned Medals: 🥇 Gold in Basics, 🥈 Silver in Advanced Drills</li>
-                <!-- Dynamically update based on students, but for demo static -->
-            </ul>
-            <button onclick="showFeedback('Great job on your latest milestone! Keep pushing!')" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded-lg">Get Racky Feedback</button>
-        </div>
-    </section>
-
-    <script>
-        // Centralized Data: Students Array (local "database")
-        let students = [];
-        let currentVenue = { name: 'Main Club', pin: 'https://maps.google.com/?q=Main+Club' };
-
-        // Show/Hide Views
-        function showView(viewId) {
-            document.querySelectorAll('section').forEach(sec => sec.classList.add('hidden'));
-            document.getElementById(viewId).classList.remove('hidden');
-            showFeedback(viewId === 'student-path' ? 'Exploring your Pro-Path? Awesome!' : 'Welcome back!');
+        if (!child || !parent || !phone || !age || !skill || !time) {
+            rackyTalk("I need all data points to begin the assessment! 🕒");
+            return;
         }
 
-        // Update Venue
-        function updateVenue(value) {
-            const [name, pin] = value.split('|');
-            currentVenue = { name, pin };
-            document.getElementById('pinned-location').textContent = `Pinned Location: ${name}`;
-        }
-
-        // Enrollment Form Submit
-        document.getElementById('enrollment-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const student = {
-                parentName: document.getElementById('parent-name').value,
-                childName: document.getElementById('child-name').value,
-                age: document.getElementById('age').value,
-                skillLevel: document.getElementById('skill-level').value,
-                timeSlot: document.getElementById('time-slot').value,
-                approved: false
+        try {
+            const newStudent = {
+                name: child,
+                level: skill,
+                parent: parent,
+                phone: phone,
+                age: Number(age),
+                time: time,
+                icon: "⚡",
+                createdAt: serverTimestamp()   // Firestore server time
             };
-            students.push(student);
-            updateRoster();
-            showFeedback(`Enrolled ${student.childName}! Check the Trainer Hub.`);
-            e.target.reset();
-        });
 
-        // Update Roster
-        function updateRoster() {
-            const roster = document.getElementById('roster');
-            roster.innerHTML = '';
-            students.forEach((student, index) => {
-                const card = document.createElement('div');
-                card.className = 'neumorphic-card';
-                card.innerHTML = `
-                    <h3 class="font-bold">${student.childName}</h3>
-                    <p>Age: ${student.age}</p>
-                    <p>Tier: ${student.skillLevel}</p>
-                    <p>Slot: ${student.timeSlot}</p>
-                    ${student.approved ? '<p class="text-green-500">Approved</p>' : `
-                        <a href="${getWhatsAppLink(student)}" target="_blank" class="block mt-2 bg-green-500 text-white py-2 rounded-lg text-center hover:bg-green-600 transition-all">Approve via WhatsApp</a>
-                    `}
-                `;
-                roster.appendChild(card);
+            await addDoc(collection(db, "students"), newStudent);
+
+            rackyTalk(`Great! ${child} is now in the system for ${time}.`);
+            setTimeout(() => switchView('trainer'), 1500);
+
+            // Clear form
+            document.getElementById('parent-name').value = '';
+            document.getElementById('child-name').value = '';
+            document.getElementById('parent-phone').value = '';
+            document.getElementById('child-age').value = '';
+            document.getElementById('child-skill').value = '';
+            document.getElementById('session-time').value = '';
+        } catch (error) {
+            console.error("Error saving student:", error);
+            rackyTalk("Oops... failed to save. Check your connection?");
+        }
+    }
+
+    function renderRoster() {
+        const container = document.getElementById('roster-container');
+        if (!container) return;
+
+        container.innerHTML = students.map(s => {
+            const message = encodeURIComponent(
+                `Hi ${s.name}, your performance baseline is confirmed for ${s.time}! 🎾\n\n` +
+                `📍 Location Pin: ${activeVenueLink}`
+            );
+
+            return `
+                <div class="glass-card p-5 flex items-center justify-between mb-4 border-l-8 border-l-[#0070D1]">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-xl shadow-inner">${s.icon}</div>
+                        <div>
+                            <h4 class="font-black text-slate-900 uppercase tracking-tight">${s.name}</h4>
+                            <p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">${s.time} | ${s.level}</p>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/\( {s.phone}?text= \){message}" target="_blank" class="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-green-200">💬</a>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function rackyTalk(msg = "Ready to pilot?") {
+        const bubble = document.getElementById('racky-speech');
+        const txt = document.getElementById('racky-msg');
+        if (!bubble || !txt) return;
+        txt.innerText = msg;
+        bubble.style.opacity = "1";
+        setTimeout(() => { bubble.style.opacity = "0"; }, 4000);
+    }
+
+    // ────────────────────────────────────────────────
+    // Real-time Firestore listener
+    function listenToStudents() {
+        const q = query(collection(db, "students"), orderBy("createdAt", "desc"));
+        onSnapshot(q, (snapshot) => {
+            students = [];
+            snapshot.forEach((doc) => {
+                students.push({ id: doc.id, ...doc.data() });
             });
-        }
+            renderRoster();
+            rackyTalk(`Roster updated! ${students.length} pilots ready.`);
+        }, (error) => {
+            console.error("Firestore listener error:", error);
+            rackyTalk("Connection issue... trying to reconnect.");
+        });
+    }
 
-        // WhatsApp Link Generator
-        function getWhatsAppLink(student) {
-            const message = `Hello ${student.parentName},\nYour enrollment for ${student.childName} is confirmed!\nTime: ${student.timeSlot}\nLocation: ${currentVenue.pin}`;
-            return `https://wa.me/?text=${encodeURIComponent(message)}`;
-        }
-
-        // Mascot Feedback
-        function showFeedback(message) {
-            const bubble = document.getElementById('speech-bubble');
-            bubble.textContent = message;
-            bubble.style.display = 'block';
-            setTimeout(() => bubble.style.display = 'none', 5000);
-        }
-
-        // Initial View
-        showView('landing');
-    </script>
+    // Start everything
+    window.addEventListener('load', () => {
+        listenToStudents();
+        rackyTalk("PadelPilotPro Online – Connected to base! 👋");
+    });
+</script>
 </body>
 </html>

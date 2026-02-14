@@ -41,7 +41,7 @@
         <div class="glass-card p-10 mb-6">
             <h2 class="text-3xl font-black text-center mb-4">Your Pro-Path</h2>
             <p class="text-center text-slate-500 mb-6">Track your progress & milestones</p>
-            <div class="bg-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden shadow-xl">
+            <div class="bg-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden mb-6 shadow-xl">
                 <p class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-2">Performance Tier</p>
                 <h3 class="text-4xl font-black italic mb-6 uppercase text-[var(--padel-neon)]">Elite Junior</h3>
                 <div class="flex gap-2">
@@ -56,9 +56,8 @@
         </div>
     </main>
 
-    <nav class="bottom-nav fixed flex justify-around items-center py-5 z-40">
+    <nav id="bottom-nav" class="bottom-nav fixed flex justify-around items-center py-5 z-40">
         <a href="index.html" class="p-2">🏠</a>
-        <a href="trainer-hub.html" class="p-2">📋</a>
         <a href="student.html" class="p-2">📈</a>
         <button onclick="logoutUser()" class="p-2 text-red-600 font-bold">Logout</button>
     </nav>
@@ -75,7 +74,7 @@
 
         function checkAccess() {
             const user = JSON.parse(localStorage.getItem('currentUser'));
-            if (!user) {
+            if (!user || user.role !== 'student') {
                 window.location.href = 'login.html';
             }
         }
@@ -87,7 +86,7 @@
 
         window.onload = () => {
             checkAccess();
-            rackyTalk("Welcome to your Pro-Path!");
+            rackyTalk("Hey superstar! Racky your hype man is here! Let's check your Pro-Path progress — you've got this! 🚀");
         };
     </script>
 </body>

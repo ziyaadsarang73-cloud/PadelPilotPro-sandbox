@@ -6,138 +6,96 @@
     <title>PadelPilotPro | Performance Lab</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK (modular CDN) -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        onSnapshot,
+        query,
+        orderBy,
+        serverTimestamp,
+        doc,
+        getDoc,
+        updateDoc
+      } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDimi5qy6YOnY7MsLymNUKtIxW-kPmH870",
+        authDomain: "padelpilotpro.firebaseapp.com",
+        projectId: "padelpilotpro",
+        storageBucket: "padelpilotpro.firebasestorage.app",
+        messagingSenderId: "326604561873",
+        appId: "1:326604561873:web:d3deb1cef55a913137d4f0"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      window.db = db;
+      window.collection = collection;
+      window.addDoc = addDoc;
+      window.onSnapshot = onSnapshot;
+      window.query = query;
+      window.orderBy = orderBy;
+      window.serverTimestamp = serverTimestamp;
+      window.doc = doc;
+      window.getDoc = getDoc;
+      window.updateDoc = updateDoc;
+    </script>
+
     <style>
         :root {
             --padel-blue: #0070D1;
             --padel-neon: #CCFF00;
             --soft-gray: #F0F7FF;
         }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--soft-gray);
-            color: #1e293b;
-            margin: 0 auto;
-            max-width: 480px;           /* Locks content to mobile width */
-            overflow-x: hidden;         /* No horizontal scroll ever */
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--soft-gray); color: #1e293b; margin: 0 auto; max-width: 480px; overflow-x: hidden; }
+        html, body { height: 100%; }
+        #app-container { min-height: 100vh; display: flex; flex-direction: column; margin: 0 auto; max-width: 480px; background: inherit; }
 
-        /* Center the entire page */
-        html, body {
-            height: 100%;
-        }
+        .glass-card { background: white; border-radius: 2.5rem; box-shadow: 0 20px 50px -10px rgba(0, 112, 209, 0.1); border: 1px solid rgba(255, 255, 255, 0.8); }
 
-        #app-container {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            margin: 0 auto;
-            max-width: 480px;
-            background: inherit;
-        }
-
-        .glass-card {
-            background: white;
-            border-radius: 2.5rem;
-            box-shadow: 0 20px 50px -10px rgba(0, 112, 209, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-        }
-
-        .btn-primary {
-            background: var(--padel-blue);
-            color: white;
-            padding: 1.25rem;
-            border-radius: 2rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            transition: all 0.2s;
-            box-shadow: 0 10px 25px -5px rgba(0, 112, 209, 0.3);
-        }
+        .btn-primary { background: var(--padel-blue); color: white; padding: 1.25rem; border-radius: 2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; box-shadow: 0 10px 25px -5px rgba(0, 112, 209, 0.3); }
         .btn-primary:active { transform: scale(0.96); }
 
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-        }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-12px); } 100% { transform: translateY(0px); } }
         .floating-racky { animation: float 3s ease-in-out infinite; }
 
         .view-section { display: none; }
         .view-section.active { display: block; }
 
         .bottom-nav {
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 40px);
-            max-width: 440px;           /* Matches max-width of content */
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(15px);
-            border-radius: 2.5rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            border: 1px solid rgba(0,0,0,0.05);
+            bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 40px); max-width: 440px;
+            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(15px);
+            border-radius: 2.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 1px solid rgba(0,0,0,0.05);
         }
 
-        /* Login Toolbar - static below header */
         #login-toolbar {
-            background: rgba(0, 112, 209, 0.92);
-            backdrop-filter: blur(12px);
+            background: rgba(0, 112, 209, 0.92); backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 12px 24px;
-            margin: 0 -24px 24px -24px; /* full-width effect */
+            padding: 12px 24px; margin: 0 -24px 24px -24px;
         }
 
-        #login-toolbar .container {
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
+        #login-toolbar .container { display: flex; justify-content: flex-end; gap: 12px; }
 
-        #login-toolbar button {
-            padding: 8px 20px;
-            font-size: 0.95rem;
-            border-radius: 9999px;
-            transition: all 0.2s;
-        }
+        #login-toolbar button { padding: 8px 20px; font-size: 0.95rem; border-radius: 9999px; transition: all 0.2s; }
 
-        #login-toolbar .login-btn {
-            background: rgba(255, 255, 255, 0.18);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        #login-toolbar .login-btn:hover {
-            background: rgba(255, 255, 255, 0.28);
-        }
+        #login-toolbar .login-btn { background: rgba(255, 255, 255, 0.18); color: white; border: 1px solid rgba(255, 255, 255, 0.3); }
+        #login-toolbar .login-btn:hover { background: rgba(255, 255, 255, 0.28); }
 
-        #login-toolbar .enroll-btn {
-            background: white;
-            color: var(--padel-blue);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-        #login-toolbar .enroll-btn:hover {
-            background: #f0f9ff;
-        }
+        #login-toolbar .enroll-btn { background: white; color: var(--padel-blue); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        #login-toolbar .enroll-btn:hover { background: #f0f9ff; }
 
         @media (max-width: 640px) {
-            body {
-                max-width: 100%; /* full width on very small screens */
-            }
-            #login-toolbar {
-                padding: 10px 16px;
-                margin: 0 -16px 16px -16px;
-            }
-            #login-toolbar .container {
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-            #login-toolbar button {
-                padding: 8px 18px;
-                font-size: 0.9rem;
-            }
-            .bottom-nav {
-                width: calc(100% - 32px);
-            }
+            #login-toolbar { padding: 10px 16px; margin: 0 -16px 16px -16px; }
+            #login-toolbar .container { justify-content: center; flex-wrap: wrap; gap: 10px; }
+            #login-toolbar button { padding: 8px 18px; font-size: 0.9rem; }
+            .bottom-nav { width: calc(100% - 32px); }
         }
     </style>
 </head>
@@ -166,17 +124,14 @@
 
         <div id="login-toolbar">
             <div class="container">
-                <button onclick="switchView('login')" class="login-btn">
-                    Login to Hub
-                </button>
-                <button onclick="switchView('landing')" class="enroll-btn">
-                    Enroll New Player
-                </button>
+                <button onclick="switchView('login')" class="login-btn">Login to Hub</button>
+                <button onclick="switchView('landing')" class="enroll-btn">Enroll New Player</button>
             </div>
         </div>
 
         <main id="view-container" class="pb-32 px-6">
 
+            <!-- Login View -->
             <section id="view-login" class="view-section py-12">
                 <div class="glass-card p-10 max-w-md mx-auto">
                     <h2 class="text-3xl font-black text-center mb-8">Sign In</h2>
@@ -191,6 +146,7 @@
                 </div>
             </section>
 
+            <!-- Trainer Hub -->
             <section id="view-trainer" class="view-section">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-sm font-black uppercase tracking-widest text-slate-400">The Roster</h2>
@@ -200,9 +156,72 @@
                     </select>
                 </div>
                 <div id="roster-container" class="space-y-4"></div>
+
+                <!-- Generate Enrollment Link Button -->
+                <div class="mt-8">
+                    <button onclick="generateEnrollmentLink()" class="w-full btn-primary flex items-center justify-center gap-2">
+                        Generate New Enrollment Link
+                    </button>
+                    <p id="link-status" class="text-center text-slate-500 mt-4 text-sm"></p>
+                    <div id="generated-link" class="mt-4 hidden text-center">
+                        <p class="text-slate-600 mb-2">Your one-time link (expires in 24 hours):</p>
+                        <input type="text" id="enroll-link-input" class="w-full p-3 rounded-xl bg-slate-100 text-sm" readonly>
+                        <button onclick="copyLink()" class="mt-2 px-6 py-2 bg-green-500 text-white rounded-full text-sm font-bold">Copy Link</button>
+                    </div>
+                </div>
             </section>
 
-            <section id="view-student" class="view-section">
+            <!-- Enrollment Form (for one-time link) -->
+            <section id="view-enroll" class="view-section py-12">
+                <div class="glass-card p-10 max-w-md mx-auto">
+                    <h2 class="text-3xl font-black text-center mb-4">Enroll New Player</h2>
+                    <p class="text-center text-slate-500 mb-8">Complete this form to enroll with your trainer.</p>
+                    
+                    <div class="space-y-6">
+                        <input type="text" id="enroll-parent-name" placeholder="Full Name (Player/Guardian)" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                        <input type="text" id="enroll-child-name" placeholder="Player Name" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                        <div class="flex gap-4">
+                            <input type="number" id="enroll-child-age" placeholder="Age" class="w-1/3 p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                            <select id="enroll-child-skill" class="w-2/3 p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none appearance-none">
+                                <option value="" disabled selected>Experience Level</option>
+                                <option value="Foundation">Foundation (Beginner)</option>
+                                <option value="Competitive">Competitive (Intermediate)</option>
+                                <option value="Elite">Elite (Advanced)</option>
+                            </select>
+                        </div>
+                        <select id="enroll-session-time" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none appearance-none">
+                            <option value="" disabled selected>Preferred Time Slot</option>
+                            <option value="Monday 4:00 PM">Monday 4:00 PM</option>
+                            <option value="Wednesday 5:00 PM">Wednesday 5:00 PM</option>
+                        </select>
+                        <input type="tel" id="enroll-parent-phone" placeholder="WhatsApp Number" class="w-full p-5 rounded-2xl bg-white border border-slate-100 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-blue-200 outline-none">
+                        <button onclick="submitEnrollmentFromLink()" class="w-full btn-primary flex items-center justify-center gap-3 mt-4">Confirm Enrollment 🎾</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Enrollment Error (invalid link) -->
+            <section id="view-enroll-error" class="view-section py-12">
+                <div class="glass-card p-10 max-w-md mx-auto text-center">
+                    <h2 class="text-3xl font-black mb-6 text-red-600">Link Invalid or Expired</h2>
+                    <p class="text-slate-600 mb-8">This enrollment link has been used, expired, or is invalid.</p>
+                    <p class="text-slate-500 mb-6">Please ask your trainer for a new link.</p>
+                    <button onclick="switchView('landing')" class="w-full btn-primary">Back to Home</button>
+                </div>
+            </section>
+
+            <!-- Thank You after enrollment -->
+            <section id="view-enroll-thanks" class="view-section py-12">
+                <div class="glass-card p-10 max-w-md mx-auto text-center">
+                    <h2 class="text-3xl font-black mb-6 text-green-600">Enrollment Complete!</h2>
+                    <p class="text-slate-600 mb-8">Your trainer has been notified and will confirm soon.</p>
+                    <p class="text-slate-500 mb-6">Thank you for joining PadelPilotPro Performance Lab.</p>
+                    <button onclick="switchView('landing')" class="w-full btn-primary">Back to Home</button>
+                </div>
+            </section>
+
+            <!-- Existing Student & Landing views (unchanged) -->
+            <section id="view-student" class="view-section px-6">
                 <div class="bg-slate-900 rounded-[3rem] p-8 text-white relative overflow-hidden mb-6 shadow-xl">
                     <p class="text-[10px] font-black uppercase text-blue-400 tracking-widest mb-2">Performance Tier</p>
                     <h3 class="text-4xl font-black italic mb-6 uppercase text-[var(--padel-neon)]">Elite Junior</h3>
@@ -213,7 +232,7 @@
                 </div>
             </section>
 
-            <section id="view-landing" class="view-section active">
+            <section id="view-landing" class="view-section active p-6">
                 <div class="glass-card p-10 mb-6">
                     <div class="inline-block px-4 py-1.5 mb-6 text-[10px] font-black tracking-widest text-white uppercase bg-[#0070D1] rounded-full">Elite Training</div>
                     <h1 class="text-6xl font-extrabold text-[#1A1A1A] leading-[0.85] tracking-tighter mb-8 italic">MASTER <br/> <span class="text-[#0070D1]">THE COURT.</span></h1>
@@ -254,12 +273,14 @@
             <button onclick="logoutUser()" class="p-2 text-red-600 font-bold">Logout</button>
         </nav>
 
-    </div> <!-- end app-container -->
+    </div>
 
 <script>
     let students = [];
     let activeVenueLink = "https://maps.google.com/?q=Main+Club";
     let currentUser = null;
+
+    // Firebase functions are exposed globally from the module script
 
     function switchView(viewId) {
         document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
@@ -276,14 +297,15 @@
     }
 
     function processInquiry() {
-        const parent = document.getElementById('parent-name').value;
-        const child = document.getElementById('child-name').value;
-        const phone = document.getElementById('parent-phone').value;
-        const age = document.getElementById('child-age').value;
+        // Existing public enrollment (unchanged)
+        const parent = document.getElementById('parent-name').value.trim();
+        const child = document.getElementById('child-name').value.trim();
+        const phone = document.getElementById('parent-phone').value.trim();
+        const age = document.getElementById('child-age').value.trim();
         const skill = document.getElementById('child-skill').value;
         const time = document.getElementById('session-time').value;
 
-        if(!child || !parent || !phone || !age || !skill || !time) {
+        if (!child || !parent || !phone || !age || !skill || !time) {
             rackyTalk("I need all data points to begin the assessment! 🕒");
             return;
         }
@@ -297,21 +319,18 @@
     function renderRoster() {
         const container = document.getElementById('roster-container');
         if (!container) return;
-        container.innerHTML = students.map(s => {
-            const message = encodeURIComponent(`Hi ${s.name}, your performance baseline is confirmed for ${s.time}! 🎾\n\n📍 Location Pin: ${activeVenueLink}`);
-            return `
-                <div class="glass-card p-5 flex items-center justify-between mb-4 border-l-8 border-l-[#0070D1]">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-xl shadow-inner">${s.icon}</div>
-                        <div>
-                            <h4 class="font-black text-slate-900 uppercase tracking-tight">${s.name}</h4>
-                            <p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">${s.time} | ${s.level}</p>
-                        </div>
+        container.innerHTML = students.map(s => `
+            <div class="glass-card p-5 flex items-center justify-between mb-4 border-l-8 border-l-[#0070D1]">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-xl shadow-inner">${s.icon}</div>
+                    <div>
+                        <h4 class="font-black text-slate-900 uppercase tracking-tight">${s.name}</h4>
+                        <p class="text-[9px] font-bold text-blue-500 uppercase tracking-widest mt-0.5">${s.time} | ${s.level}</p>
                     </div>
-                    <a href="https://wa.me/\( {s.phone}?text= \){message}" target="_blank" class="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-green-200">💬</a>
                 </div>
-            `;
-        }).join('');
+                <a href="https://wa.me/\( {s.phone}?text= \){encodeURIComponent(`Hi ${s.name}, your performance baseline is confirmed for ${s.time}! 🎾\n\n📍 Location Pin: ${activeVenueLink}`)}" target="_blank" class="w-10 h-10 bg-green-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-green-200">💬</a>
+            </div>
+        `).join('');
     }
 
     function rackyTalk(msg = "Ready to pilot?") {
@@ -347,9 +366,141 @@
         switchView('landing');
     }
 
+    // ────────────────────────────────────────────────
+    // Generate One-Time Enrollment Link (Trainer Only)
+    async function generateEnrollmentLink() {
+        if (!currentUser || currentUser.role !== 'trainer') {
+            rackyTalk("Only trainers can generate enrollment links!");
+            return;
+        }
+
+        const token = crypto.randomUUID().slice(0, 12); // short unique token
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+        try {
+            await addDoc(collection(db, "enrollment_tokens"), {
+                token,
+                trainerEmail: currentUser.email,
+                createdAt: serverTimestamp(),
+                expiresAt: expiresAt.toISOString(),
+                used: false
+            });
+
+            const link = `\( {window.location.origin} \){window.location.pathname}?enroll=${token}`;
+            document.getElementById('enroll-link-input').value = link;
+            document.getElementById('generated-link').classList.remove('hidden');
+            document.getElementById('link-status').innerText = "Link generated! Share it with parents.";
+
+            rackyTalk("Enrollment link ready — expires in 24 hours!");
+        } catch (error) {
+            console.error("Error generating token:", error);
+            rackyTalk("Failed to generate link. Check connection?");
+        }
+    }
+
+    function copyLink() {
+        const input = document.getElementById('enroll-link-input');
+        input.select();
+        document.execCommand('copy');
+        rackyTalk("Link copied to clipboard!");
+    }
+
+    // ────────────────────────────────────────────────
+    // Check if we are in enroll mode (?enroll=token)
+    async function checkEnrollMode() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('enroll');
+
+        if (token) {
+            switchView('enroll');
+
+            try {
+                const tokenQuery = query(collection(db, "enrollment_tokens"), where("token", "==", token));
+                const snapshot = await getDocs(tokenQuery);
+
+                if (snapshot.empty) {
+                    switchView('enroll-error');
+                    rackyTalk("Invalid enrollment link.");
+                    return;
+                }
+
+                const tokenDoc = snapshot.docs[0];
+                const data = tokenDoc.data();
+
+                if (data.used) {
+                    switchView('enroll-error');
+                    rackyTalk("This link has already been used.");
+                    return;
+                }
+
+                const expires = new Date(data.expiresAt);
+                if (new Date() > expires) {
+                    switchView('enroll-error');
+                    rackyTalk("This link has expired.");
+                    return;
+                }
+
+                // Token valid — show form
+                rackyTalk("Enrollment form ready! Fill in the details.");
+            } catch (error) {
+                console.error("Token check error:", error);
+                switchView('enroll-error');
+            }
+        }
+    }
+
+    // ────────────────────────────────────────────────
+    // Submit enrollment from link
+    async function submitEnrollmentFromLink() {
+        const parent = document.getElementById('enroll-parent-name').value.trim();
+        const child = document.getElementById('enroll-child-name').value.trim();
+        const phone = document.getElementById('enroll-parent-phone').value.trim();
+        const age = document.getElementById('enroll-child-age').value.trim();
+        const skill = document.getElementById('enroll-child-skill').value;
+        const time = document.getElementById('enroll-session-time').value;
+
+        if (!child || !parent || !phone || !age || !skill || !time) {
+            rackyTalk("All fields are required!");
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('enroll');
+
+        try {
+            // Save student
+            await addDoc(collection(db, "students"), {
+                name: child,
+                level: skill,
+                parent: parent,
+                phone: phone,
+                age: Number(age),
+                time: time,
+                icon: "⚡",
+                createdAt: serverTimestamp(),
+                enrolledViaToken: token
+            });
+
+            // Mark token as used
+            const tokenQuery = query(collection(db, "enrollment_tokens"), where("token", "==", token));
+            const snapshot = await getDocs(tokenQuery);
+            if (!snapshot.empty) {
+                const tokenDocRef = doc(db, "enrollment_tokens", snapshot.docs[0].id);
+                await updateDoc(tokenDocRef, { used: true, usedAt: serverTimestamp() });
+            }
+
+            switchView('enroll-thanks');
+            rackyTalk("Enrollment successful! Your trainer has been notified.");
+        } catch (error) {
+            console.error("Enrollment error:", error);
+            rackyTalk("Failed to enroll. Try again?");
+        }
+    }
+
     window.onload = () => {
         renderRoster();
         rackyTalk("PadelPilotPro Online. 👋");
+        checkEnrollMode(); // Check if URL has ?enroll=token
     };
 </script>
 </body>
